@@ -83,9 +83,10 @@ export const PLL_IMAGE_MAP: Record<PllId, string[]> = PLL_OPTIONS.reduce(
 );
 
 const toAssetPath = (relativePath: string) => {
-  const base = (import.meta.env.BASE_URL ?? '').replace(/\/$/, '');
-  const normalized = relativePath.replace(/^\/+/, '');
-  return `${base}/${normalized}`;
+  const base = import.meta.env.BASE_URL ?? './';
+  const normalizedBase = base.endsWith('/') ? base : `${base}/`;
+  const normalizedPath = relativePath.replace(/^\/+/, '');
+  return `${normalizedBase}${normalizedPath}`;
 };
 
 export const LEARN_2D_IMAGES: Record<PllId, string[]> = PLL_OPTIONS.reduce(

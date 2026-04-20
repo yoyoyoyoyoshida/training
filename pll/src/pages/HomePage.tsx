@@ -71,6 +71,12 @@ function HomePage() {
         </button>
       </div>
 
+      <div className="home__portal-back">
+        <a href="/training/" className="home__portal-link">
+          ← 特訓ポータル（その他のツール）へ
+        </a>
+      </div>
+
       <div className="home__spacer" style={{ height: '2rem' }} />
 
       <AdSenseSlot />

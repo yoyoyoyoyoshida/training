@@ -17,7 +17,7 @@ function BellIcon() {
 
 function LogoSVG() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="app-shell__logo-svg" draggable={false}>
+    <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="app-shell__logo-svg">
       <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="#ff0000" strokeDasharray="12.16 48.64" strokeDashoffset="0" />
       <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="#0055ff" strokeDasharray="12.16 48.64" strokeDashoffset="-12.16" />
       <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="#ff8800" strokeDasharray="12.16 48.64" strokeDashoffset="-24.32" />
@@ -83,6 +83,9 @@ function Layout({ children }: PropsWithChildren) {
                   <BellIcon />
                 </Link>
               </div>
+              <a href="/training/" className="app-shell__nav-link">
+                ポータルへ戻る
+              </a>
                 <a
                   href="https://apps.apple.com/jp/app/2sidepll/id6747999697"
                   target="_blank"
@@ -90,9 +93,8 @@ function Layout({ children }: PropsWithChildren) {
                   className="app-shell__nav-link app-shell__nav-link--external"
                   style={{ color: '#32cd32', fontWeight: 800 }}
                 >
-                   App Store 入手<span aria-hidden="true">↗</span>
+                  App Store 入手<span aria-hidden="true">↗</span>
                 </a>
-              </div>
               <a
                 href={contactUrl}
                 target="_blank"
@@ -126,6 +128,11 @@ function Layout({ children }: PropsWithChildren) {
       <aside className={clsx('app-shell__menu', { 'is-open': menuOpen })}>
         <h2>メニュー</h2>
         <ul className="app-shell__menu-list">
+          <li>
+            <a href="/training/" style={{ color: '#32cd32', fontWeight: 'bold' }}>
+              ← 特訓ポータルへ
+            </a>
+          </li>
           <li>
             <a href="https://apps.apple.com/jp/app/2sidepll/id6747999697" target="_blank" rel="noreferrer">
               App Store ダウンロード

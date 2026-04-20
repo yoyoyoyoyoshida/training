@@ -491,15 +491,6 @@ function TimeAttackPage() {
             </ul>
           </div>
 
-          <div className="time-attack__sidebar">
-            <h3>自己ベスト</h3>
-            <ul>
-              <li>本日の最高: {highScores.daily} 問</li>
-              <li>歴代最高: {highScores.allTime} 問</li>
-              <li>復習リスト: {wrongAnswers.length} 件</li>
-            </ul>
-          </div>
-
           <AdSenseSlot format="horizontal" />
           <BackHomeButton />
         </div>

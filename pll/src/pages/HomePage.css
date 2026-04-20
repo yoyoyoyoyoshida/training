@@ -130,6 +130,17 @@
   color: #32cd32;
 }
 
+.home__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  padding: 0 0.5rem;
+}
+
+.home__actions .action-card.is-highlight {
+  border-width: 3px;
+}
+
 .home__app-promo {
   display: flex;
   justify-content: center;
@@ -164,6 +175,23 @@
 .home__app-pill-arrow {
   color: #32cd32;
   font-size: 1.1rem;
+}
+
+.home__portal-back {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.home__portal-link {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.home__portal-link:hover {
+  color: var(--accent-color, #32cd32);
 }
 
 

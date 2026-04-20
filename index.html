@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GACHI-CUBE 特訓ポータル</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --accent-green: #32CD32;
+            --accent-blue: #007AFF;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --font-family: 'Outfit', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-grid {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: perspective(500px) rotateX(60deg) translateY(-50%);
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            from { transform: perspective(500px) rotateX(60deg) translateY(-50%); }
+            to { transform: perspective(500px) rotateX(60deg) translateY(-40%); }
+        }
+
+        .bg-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(50, 205, 50, 0.1) 0%, transparent 70%);
+            top: -200px;
+            right: -100px;
+            filter: blur(80px);
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 5rem;
+            animation: heroFadeIn 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes heroFadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-text {
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: 0.3em;
+            color: var(--accent-green);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .title {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+        }
+
+        .description {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .app-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 32px;
+            padding: 3rem 2rem;
+            text-decoration: none;
+            color: inherit;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.05), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .app-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .app-card:hover::after {
+            opacity: 1;
+        }
+
+        .app-card.pll:hover { box-shadow: 0 20px 40px rgba(50, 205, 50, 0.15); }
+        .app-card.cross:hover { box-shadow: 0 20px 40px rgba(0, 122, 255, 0.15); }
+
+        .app-icon {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+            transition: transform 0.4s ease;
+        }
+
+        .app-card:hover .app-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .app-name {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            letter-spacing: -0.01em;
+        }
+
+        .app-desc {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .app-status {
+            padding: 0.5rem 1.2rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .status--online {
+            background: rgba(50, 205, 50, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(50, 205, 50, 0.3);
+        }
+
+        .status--coming {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer {
+            padding: 3rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.3);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        @media (max-width: 640px) {
+            .main-container { padding: 3rem 1.5rem; }
+            .hero { margin-bottom: 3.5rem; }
+            .app-grid { gap: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-container">
+        <div class="bg-grid"></div>
+        <div class="bg-glow"></div>
+    </div>
+
+    <main class="main-container">
+        <section class="hero">
+            <span class="logo-text">Gachi-Cube</span>
+            <h1 class="title">Training Portal</h1>
+            <p class="description">
+                スピードキュービングの限界を突破するための、専用特訓ツールポータル。
+            </p>
+        </section>
+
+        <div class="app-grid">
+            <a href="./pll/" class="app-card pll">
+                <div class="app-icon">⚡️</div>
+                <h2 class="app-name">PLL Recognition</h2>
+                <p class="app-desc">0.5秒でPLLを判断する。配色から直感的に見抜くための2側面判断トレーニング。</p>
+                <span class="app-status status--online">Available Now</span>
+            </a>
+
+            <div class="app-card cross status--coming-card">
+                <div class="app-icon">🎯</div>
+                <h2 class="app-name">Cross Practice</h2>
+                <p class="app-desc">インスペクションタイムを最大限に活用し、最も効率的なクロスを導き出す練習。</p>
+                <span class="app-status status--coming">Coming Soon</span>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        &copy; 2026 GACHI-CUBE TRAINING HUB
+    </footer>
+</body>
+</html>
