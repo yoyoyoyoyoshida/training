@@ -5,6 +5,7 @@ export type Move = string;
 
 export interface CubieState {
   id: number;
+  initialPos: { x: number, y: number, z: number };
   position: THREE.Vector3;
   rotation: THREE.Quaternion;
 }
@@ -17,6 +18,7 @@ export function createInitialState(): CubieState[] {
       for (let z = -1; z <= 1; z++) {
         state.push({
           id: id++,
+          initialPos: { x, y, z },
           position: new THREE.Vector3(x, y, z),
           rotation: new THREE.Quaternion(),
         });
@@ -39,6 +41,7 @@ export function parseMoveString(movesStr: string): Move[] {
 export function performMove(state: CubieState[], move: Move): CubieState[] {
   const newState = state.map(c => ({ 
     id: c.id, 
+    initialPos: { ...c.initialPos },
     position: c.position.clone(), 
     rotation: c.rotation.clone() 
   }));

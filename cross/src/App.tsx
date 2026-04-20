@@ -130,9 +130,8 @@ function App() {
         <div className="scene-container">
           <Canvas camera={{ position: [5, 5, 8], fov: 45 }}>
             <color attach="background" args={['#050505']} />
-            <ambientLight intensity={0.5} />
-            <directionalLight position={[10, 10, 5]} intensity={1} />
-            <Environment preset="city" />
+            <ambientLight intensity={0.8} />
+            <directionalLight position={[5, 10, 7]} intensity={0.5} />
             <RubiksCube cubies={cubies} />
             <OrbitControls enablePan={false} />
           </Canvas>
