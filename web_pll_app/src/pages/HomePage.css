@@ -149,20 +149,20 @@
   display: inline-flex;
   padding: 1.1rem 2.8rem;
   border-radius: 30px;
-  background: #32cd32;
-  color: #000000;
+  background: #0071e3;
+  color: #ffffff;
   font-weight: 800;
   font-size: 1.1rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  box-shadow: 0 8px 25px rgba(50, 205, 50, 0.4);
+  box-shadow: 0 8px 25px rgba(0, 113, 227, 0.4);
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .home__store-link:hover {
   transform: translateY(-5px) scale(1.05);
-  box-shadow: 0 12px 35px rgba(50, 205, 50, 0.6);
-  background: #40ff40;
+  box-shadow: 0 12px 35px rgba(0, 113, 227, 0.6);
+  background: #0077ed;
 }
 
 .home__primary,

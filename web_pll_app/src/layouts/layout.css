@@ -277,23 +277,53 @@
 .app-shell__brand {
   display: inline-flex;
   align-items: center;
-  font-weight: 800;
-  font-size: 1.5rem;
-  letter-spacing: 0.12em;
-  color: #fff;
-  text-transform: uppercase;
+  gap: 0.8rem;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.app-shell__brand:hover {
+  transform: scale(1.02);
+}
+
+.app-shell__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.1));
+}
+
+.app-shell__logo-svg {
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-shell__brand:hover .app-shell__logo-svg {
+  transform: rotate(180deg);
+}
+
+.app-shell__brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
 }
 
 .app-shell__brand-primary {
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   background: linear-gradient(135deg, #facc15, #f97316, #ef4444);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .app-shell__brand-secondary {
-  margin-left: 0.45rem;
-  font-size: 1.1rem;
-  color: #eeeeee;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 0.2rem;
 }
 
 .app-shell__nav {
