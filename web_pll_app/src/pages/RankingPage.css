@@ -4,19 +4,60 @@
   gap: 2rem;
 }
 
-.ranking__header {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(10px);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  padding: 2rem 2.4rem;
+.ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
-.ranking__header p {
-  margin-top: 0.75rem;
-  max-width: 640px;
-  color: rgba(255, 255, 255, 0.6);
+.ranking__coach {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 1.5rem 0 0.5rem;
+  width: 100%;
+}
+
+.ranking__coach-avatar img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 25px rgba(0, 0, 0, 0.5));
+}
+
+.ranking__coach-bubble {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  padding: 0.8rem 1.2rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  position: relative;
+  min-width: 200px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.ranking__coach-bubble::after {
+  content: '';
+  position: absolute;
+  left: -9px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  background: rgba(45, 45, 45, 0.6); /* Approximate visible color for tail */
+  backdrop-filter: blur(10px);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.ranking__coach-bubble p {
+  margin: 0;
+  line-height: 1.4;
 }
 
 .ranking__placeholder {

@@ -83,6 +83,16 @@ function Layout({ children }: PropsWithChildren) {
                   <BellIcon />
                 </Link>
               </div>
+                <a
+                  href="https://apps.apple.com/jp/app/2sidepll/id6747999697"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="app-shell__nav-link app-shell__nav-link--external"
+                  style={{ color: '#32cd32', fontWeight: 800 }}
+                >
+                   App Store 入手<span aria-hidden="true">↗</span>
+                </a>
+              </div>
               <a
                 href={contactUrl}
                 target="_blank"

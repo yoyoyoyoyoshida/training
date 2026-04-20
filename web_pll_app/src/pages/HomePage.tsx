@@ -1,28 +1,18 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import ActionCard from '../components/ActionCard';
 import AdSenseSlot from '../components/AdSenseSlot';
 import QrCode from '../components/QrCode';
 import profileIcon from '../../icon/1.png';
 import practiceIcon from '../../icon/2.png';
 import challengeIcon from '../../icon/3.png';
+import rankingIcon from '../../icon/4.png';
 import samplePllIcon from '../../icon/sample_pll.png';
 import './HomePage.css';
 
-function TrophyIcon() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-      <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-      <path d="M4 22h16" />
-      <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-      <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-      <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-    </svg>
-  );
-}
-
 function HomePage() {
   const [showAppModal, setShowAppModal] = useState(false);
+
   return (
     <section className="home">
       <div className="home__motion-bg" aria-hidden="true">
@@ -30,20 +20,13 @@ function HomePage() {
         <span className="shape shape--two" />
         <span className="shape shape--three" />
       </div>
+
       <div className="home__hero">
         <h1 className="home__title">0.5秒でPLL判断しよう！</h1>
         
         <div className="home__hero-image">
           <img src={samplePllIcon} alt="PLL Challenge" draggable={false} />
         </div>
-
-        <button 
-          className="home__app-trigger"
-          onClick={() => setShowAppModal(true)}
-        >
-          <span>iPhoneアプリはこちら</span>
-          <span className="home__subtitle-arrow">→</span>
-        </button>
       </div>
 
       <div className="home__actions">
@@ -74,34 +57,60 @@ function HomePage() {
           description="世界中のプレイヤーとスコアを競いましょう。JST基準で今日のトップも掲載中。"
           to="/ranking"
           accent="blue"
-          icon={<TrophyIcon />}
+          icon={<img src={rankingIcon} alt="" draggable={false} />}
         />
       </div>
 
+      <div className="home__app-promo">
+        <button 
+          className="home__app-pill"
+          onClick={() => setShowAppModal(true)}
+        >
+          <span>iPhoneアプリはこちら</span>
+          <span className="home__app-pill-arrow">→</span>
+        </button>
+      </div>
+
+      <div className="home__spacer" style={{ height: '2rem' }} />
+
       <AdSenseSlot />
 
-      {/* App Store Modal */}
-      {showAppModal && (
+      {/* App Store Window Modal */}
+      {showAppModal && createPortal(
         <div className="home__modal-overlay" onClick={() => setShowAppModal(false)}>
-          <div className="home__modal" onClick={e => e.stopPropagation()}>
-            <button className="home__modal-close" onClick={() => setShowAppModal(false)}>×</button>
-            <h3>iPhoneアプリを入手</h3>
-            <p>App Storeで今すぐダウンロード</p>
-            <div className="home__modal-content">
-              <a
-                className="home__store-link"
-                href="https://apps.apple.com/jp/app/2sidepll/id6747999697"
-                target="_blank"
-                rel="noreferrer"
-              >
-                App Store
-              </a>
-              <div className="home__modal-qr">
-                <QrCode url="https://apps.apple.com/jp/app/2sidepll/id6747999697" size={180} />
+          <div className="home__window" onClick={e => e.stopPropagation()}>
+            <div className="home__window-titlebar">
+              <div className="home__window-controls">
+                <span className="dot dot--close" onClick={() => setShowAppModal(false)} />
+                <span className="dot dot--min" />
+                <span className="dot dot--max" />
+              </div>
+              <span className="home__window-title">App Store</span>
+            </div>
+            <div className="home__window-body">
+              <div className="home__modal-header">
+                <div className="home__modal-icon"></div>
+                <h3>iPhoneアプリを入手</h3>
+                <p>2side PLL Recognition</p>
+              </div>
+              <div className="home__modal-content">
+                <div className="home__modal-qr-section">
+                  <QrCode url="https://apps.apple.com/jp/app/2sidepll/id6747999697" size={200} />
+                  <span>カメラでスキャン</span>
+                </div>
+                <a
+                  className="home__store-link"
+                  href="https://apps.apple.com/jp/app/2sidepll/id6747999697"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  App Store
+                </a>
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </section>
   );

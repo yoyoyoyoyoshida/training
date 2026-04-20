@@ -13,6 +13,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import { firestore, isFirebaseConfigured } from '../utils/firebaseClient';
 import { highScoreManager } from '../utils/highScoreManager';
+import rankingIcon from '../../icon/4.png';
 import AdSenseSlot from '../components/AdSenseSlot';
 import BackHomeButton from '../components/BackHomeButton';
 import './RankingPage.css';
@@ -151,10 +152,14 @@ function RankingPage() {
 
   return (
     <section className="ranking">
-      <header className="ranking__header">
-        <h1>ランキング</h1>
-        <p>世界中のプレイヤーとスコアを競い合いましょう。Firebaseの同一コレクションを利用するため、モバイル版とランキングが共有されます。</p>
-      </header>
+      <div className="ranking__coach">
+        <div className="ranking__coach-avatar">
+          <img src={rankingIcon} alt="Coach" />
+        </div>
+        <div className="ranking__coach-bubble">
+          <p>みんなの記録をチェックしよう！<br />君もランクイン目指して頑張ってね！</p>
+        </div>
+      </div>
 
       {!isFirebaseConfigured ? (
         <div className="ranking__placeholder">
