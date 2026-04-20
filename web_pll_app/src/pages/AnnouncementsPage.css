@@ -1,0 +1,63 @@
+.announcements {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.announcements__header {
+  background: rgba(15, 23, 42, 0.88);
+  color: white;
+  padding: 2rem 2.4rem;
+  border-radius: 24px;
+}
+
+.announcements__header p {
+  margin-top: 0.75rem;
+  max-width: 640px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.announcements__placeholder,
+.announcements__error {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  padding: 1.6rem 2rem;
+  box-shadow: 0 24px 52px -36px rgba(15, 23, 42, 0.35);
+}
+
+.announcements__error {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: rgba(185, 28, 28, 0.9);
+}
+
+.announcements__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.announcements__card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  padding: 1.6rem 2rem;
+  box-shadow: 0 20px 45px -32px rgba(15, 23, 42, 0.4);
+}
+
+.announcements__card time {
+  display: block;
+  font-size: 0.85rem;
+  color: rgba(15, 23, 42, 0.6);
+  margin-bottom: 0.5rem;
+}
+
+.announcements__card h2 {
+  margin: 0.2rem 0 0.7rem;
+}
+
+.announcements__card p {
+  margin: 0;
+  white-space: pre-line;
+  line-height: 1.6;
+}

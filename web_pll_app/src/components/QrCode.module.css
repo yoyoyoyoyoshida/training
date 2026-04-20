@@ -1,0 +1,27 @@
+.qr-block {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  max-width: 420px;
+}
+
+.qr-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+  color: rgba(15, 23, 42, 0.78);
+}
+
+.qr-text strong {
+  font-size: 1.05rem;
+  color: rgba(15, 23, 42, 0.92);
+}
+
+.qr-image {
+  flex-shrink: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(148, 163, 184, 0.16);
+  padding: 0.25rem;
+}

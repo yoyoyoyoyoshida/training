@@ -1,0 +1,11 @@
+RewriteEngine On
+RewriteBase /puzzle/game/pll_recognize/
+
+# 既存のファイルやディレクトリはそのまま返す
+RewriteRule ^index\.html$ - [L]
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# その他のルートは全てSPAのエントリーポイントへ転送
+RewriteRule . /puzzle/game/pll_recognize/index.html [L]

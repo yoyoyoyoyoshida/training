@@ -1,0 +1,82 @@
+.practice {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+
+.practice__header {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+.practice__coach {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.8rem;
+}
+
+.practice__coach img {
+  width: min(180px, 30vw);
+  height: auto;
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.4));
+}
+
+.practice__coach-bubble {
+  background: white;
+  color: #0f172a;
+  border-radius: 18px;
+  padding: 0.8rem 1.2rem;
+  font-weight: 700;
+  font-size: 1.15rem;
+  position: relative;
+  min-width: 140px;
+  text-align: center;
+  box-shadow: 0 20px 35px -25px rgba(255, 255, 255, 0.9);
+}
+
+.practice__coach-bubble::after {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  background: white;
+  transform: translateY(-50%) rotate(45deg);
+  box-shadow: 0 20px 35px -25px rgba(255, 255, 255, 0.9);
+}
+
+.practice__coach-bubble p {
+  margin: 0;
+}
+
+.practice__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.practice__review {
+  margin-top: 2rem;
+}
+
+.practice__review-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+@media (max-width: 640px) {
+  .practice__coach {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .practice__coach img {
+    width: 120px;
+  }
+}
