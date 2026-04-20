@@ -31,13 +31,8 @@ function Layout({ children }: PropsWithChildren) {
 
   const closeMenu = () => setMenuOpen(false);
 
-  const pageBackdrop = {
-    backgroundImage:
-      'linear-gradient(135deg, rgba(248,250,252,0.98) 0%, rgba(241,245,249,0.97) 45%, rgba(255,255,255,0.98) 100%)',
-  } as const;
-
   return (
-    <div className="app-shell" style={pageBackdrop}>
+    <div className="app-shell">
       <div className="app-shell__background" aria-hidden="true">
         <span className="app-shell__grid" />
         <span className="app-shell__beam app-shell__beam--one" />
@@ -100,7 +95,6 @@ function Layout({ children }: PropsWithChildren) {
           </div>
         </div>
       </header>
-      {menuOpen ? <div className="app-shell__menu-backdrop" onClick={closeMenu} /> : null}
       <aside className={clsx('app-shell__menu', { 'is-open': menuOpen })}>
         <h2>メニュー</h2>
         <ul className="app-shell__menu-list">

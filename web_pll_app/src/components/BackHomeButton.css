@@ -1,21 +1,27 @@
 .back-home {
-  margin-top: 2rem;
+  margin-top: 3.5rem;
+  display: flex;
+  justify-content: center;
 }
 
 .back-home__link {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.6rem 1.2rem;
-  border-radius: 999px;
-  font-weight: 600;
+  padding: 0.8rem 1.6rem;
+  border-radius: 30px;
+  font-weight: 700;
   font-size: 0.95rem;
-  color: #0f172a;
-  border: 1px solid rgba(59, 130, 246, 0.45);
-  background: linear-gradient(135deg, rgba(239, 246, 255, 0.8), rgba(219, 234, 254, 0.8));
-  box-shadow: 0 12px 28px -20px rgba(59, 130, 246, 0.55);
+  color: #eeeeee;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
 }
 
 .back-home__link:hover {
-  transform: translateY(-2px);
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
 }

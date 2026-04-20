@@ -24,8 +24,10 @@
 }
 
 .practice__coach-bubble {
-  background: white;
-  color: #0f172a;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 18px;
   padding: 0.8rem 1.2rem;
   font-weight: 700;
@@ -33,19 +35,21 @@
   position: relative;
   min-width: 140px;
   text-align: center;
-  box-shadow: 0 20px 35px -25px rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
 .practice__coach-bubble::after {
   content: '';
   position: absolute;
-  left: -12px;
+  left: -8px;
   top: 50%;
-  width: 20px;
-  height: 20px;
-  background: white;
+  width: 16px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   transform: translateY(-50%) rotate(45deg);
-  box-shadow: 0 20px 35px -25px rgba(255, 255, 255, 0.9);
 }
 
 .practice__coach-bubble p {
@@ -66,8 +70,19 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-weight: 600;
-  color: #2563eb;
+  font-weight: 700;
+  color: #32cd32;
+  text-decoration: none;
+  background: rgba(50, 205, 50, 0.1);
+  padding: 0.8rem 1.5rem;
+  border-radius: 99px;
+  border: 1px solid rgba(50, 205, 50, 0.3);
+  transition: all 0.2s ease;
+}
+
+.practice__review-link:hover {
+  background: rgba(50, 205, 50, 0.2);
+  transform: translateX(5px);
 }
 
 @media (max-width: 640px) {
