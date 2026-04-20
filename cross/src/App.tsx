@@ -8,6 +8,7 @@ import { checkCrossSolved } from './utils/crossValidator';
 import { VirtualPad } from './components/VirtualPad';
 import { RankingBoard } from './components/RankingBoard';
 import { useAuth } from './hooks/useAuth';
+import { getDailyScramble } from './utils/scrambleGenerator';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './lib/firebase';
 
@@ -17,6 +18,7 @@ function App() {
   const { user, login } = useAuth();
   const [cubies, setCubies] = useState(() => performMove(createInitialState(), 'x2'));
   const [status, setStatus] = useState<GameStatus>('IDLE');
+  const [currentBatchId, setCurrentBatchId] = useState(() => getDailyScramble().batchId);
   const [moveCount, setMoveCount] = useState(0);
   const [timeMs, setTimeMs] = useState(0);
   const timerRef = useRef<number | null>(null);
@@ -52,13 +54,13 @@ function App() {
             userName: user.displayName || 'Anonymous',
             moveCount: moveCount,
             timeTaken: timeMs,
+            batchId: currentBatchId,
             createdAt: serverTimestamp(),
-            // problemBatchId はフェーズ3で追加
           }).catch(err => console.error("Score save failed:", err));
         }
       }
     }
-  }, [cubies, status, user, moveCount, timeMs]);
+  }, [cubies, status, user, moveCount, timeMs, currentBatchId]);
 
   const handleInputMove = (move: Move) => {
     if (status === 'SOLVED') return;
@@ -87,6 +89,18 @@ function App() {
     setStatus('IDLE');
     setMoveCount(0);
     setTimeMs(0);
+    setCurrentBatchId('FREE_PRACTICE_' + Date.now()); // Free practice moves get random unique batch so they don't corrupt daily rankings
+  };
+
+  const handleDailyScramble = () => {
+    const daily = getDailyScramble();
+    stopTimer();
+    const initialState = performMove(createInitialState(), 'x2');
+    setCubies(performMoves(initialState, daily.scramble));
+    setStatus('IDLE');
+    setMoveCount(0);
+    setTimeMs(0);
+    setCurrentBatchId(daily.batchId);
   };
 
   const formatTime = (ms: number) => (ms / 1000).toFixed(2);
@@ -145,17 +159,26 @@ function App() {
             </label>
           </div>
 
-        <button 
-          className="primary-btn" 
-          onClick={handleRandomScramble}
-          style={{ background: status === 'PLAYING' ? '#333' : 'var(--accent-blue)' }}
-        >
-          {status === 'PLAYING' ? 'やり直す (Scramble)' : 'ランダムスクランブル'}
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button 
+            className="primary-btn" 
+            onClick={handleDailyScramble}
+            style={{ flex: 1.5, background: 'var(--accent-green)', color: '#000' }}
+          >
+            最新の課題 (全国共通)
+          </button>
+          <button 
+            className="primary-btn" 
+            onClick={handleRandomScramble}
+            style={{ flex: 1, background: '#333', fontSize: '0.9rem' }}
+          >
+            フリートレーニング
+          </button>
+        </div>
 
         <VirtualPad onInputMove={handleInputMove} disabled={status === 'SOLVED'} />
         
-        <RankingBoard />
+        <RankingBoard batchId={currentBatchId} />
       </div>
     </div>
   </>

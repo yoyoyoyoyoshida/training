@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 interface Score {
@@ -9,16 +9,15 @@ interface Score {
   timeTaken: number;
 }
 
-export function RankingBoard() {
+export function RankingBoard({ batchId }: { batchId: string }) {
   const [scores, setScores] = useState<Score[]>([]);
 
   useEffect(() => {
-    // 複合インデックスエラーを避けるため、メインのソートのみFirestoreで行い、
-    // タイムのタイブレークはクライアント側で処理します
+    // 複合インデックスを避けるため、特定の配信期間（batchId）のデータを全て取得し、
+    // クライアント側で全てのソート（手数 -> タイム）を行います。
     const q = query(
       collection(db, 'scores'),
-      orderBy('moveCount', 'asc'),
-      limit(50)
+      where('batchId', '==', batchId)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -46,7 +45,7 @@ export function RankingBoard() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [batchId]);
 
   const formatTime = (ms: number) => (ms / 1000).toFixed(2);
 
