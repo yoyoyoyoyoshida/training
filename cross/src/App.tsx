@@ -1,0 +1,136 @@
+import { useState, useRef, useEffect } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Environment } from '@react-three/drei';
+
+import { RubiksCube } from './components/RubiksCube';
+import { createInitialState, parseMoveString, performMoves, performMove, Move } from './utils/cubeState';
+import { checkCrossSolved } from './utils/crossValidator';
+import { VirtualPad } from './components/VirtualPad';
+
+type GameStatus = 'IDLE' | 'PLAYING' | 'SOLVED';
+
+function App() {
+  const [cubies, setCubies] = useState(() => performMove(createInitialState(), 'x2'));
+  const [status, setStatus] = useState<GameStatus>('IDLE');
+  const [moveCount, setMoveCount] = useState(0);
+  const [timeMs, setTimeMs] = useState(0);
+  const timerRef = useRef<number | null>(null);
+
+  const startTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setStatus('PLAYING');
+    const startObj = Date.now() - timeMs;
+    timerRef.current = window.setInterval(() => {
+      setTimeMs(Date.now() - startObj);
+    }, 10);
+  };
+
+  const stopTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  // Check solve status securely when state updates
+  useEffect(() => {
+    if (status === 'PLAYING') {
+      const isSolved = checkCrossSolved(cubies, 'WHITE') || checkCrossSolved(cubies, 'YELLOW');
+      if (isSolved) {
+        setStatus('SOLVED');
+        stopTimer();
+      }
+    }
+  }, [cubies, status]);
+
+  const handleInputMove = (move: Move) => {
+    if (status === 'SOLVED') return;
+
+    // x, y, z などの全体持ち替え以外は全て物理手（1手）としてカウント
+    const mCore = move.replace(/['2\sw]/gi, '').toLowerCase();
+    const isPhysical = !['x', 'y', 'z'].includes(mCore) && mCore.length > 0;
+
+    if (status === 'IDLE' && isPhysical) {
+      startTimer();
+    }
+
+    setCubies(prev => performMove(prev, move));
+    if (isPhysical) {
+      setMoveCount(prev => prev + 1);
+    }
+  };
+
+  const handleRandomScramble = () => {
+    const basicMoves = ['R', "R'", 'L', "L'", 'U', "U'", 'D', "D'", 'F', "F'", 'B', "B'"];
+    const scramble = Array.from({ length: 15 }, () => basicMoves[Math.floor(Math.random() * basicMoves.length)]);
+    
+    stopTimer();
+    const initialState = performMove(createInitialState(), 'x2');
+    setCubies(performMoves(initialState, scramble));
+    setStatus('IDLE');
+    setMoveCount(0);
+    setTimeMs(0);
+  };
+
+  const formatTime = (ms: number) => (ms / 1000).toFixed(2);
+
+  return (
+    <>
+      <header className="app-header">
+        <div className="brand">
+          Cross <span className="brand-accent">Practice</span>
+        </div>
+        <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+          <a href="/training/" className="back-link">← ポータルへ戻る</a>
+        </div>
+      </header>
+
+      <div className="main-content">
+        <div className="scene-container">
+          <Canvas camera={{ position: [5, 5, 8], fov: 45 }}>
+            <color attach="background" args={['#050505']} />
+            <ambientLight intensity={0.5} />
+            <directionalLight position={[10, 10, 5]} intensity={1} />
+            <Environment preset="city" />
+            <RubiksCube cubies={cubies} />
+            <OrbitControls enablePan={false} />
+          </Canvas>
+        </div>
+
+        <div className="controls-panel">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', background: 'var(--card-bg)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
+            <div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.05em' }}>TIME</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, fontFamily: 'monospace', color: '#fff', lineHeight: 1 }}>{formatTime(timeMs)}<span style={{fontSize:'1rem'}}>s</span></div>
+            </div>
+            <div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.05em' }}>MOVES</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 800, fontFamily: 'monospace', color: '#fff', lineHeight: 1 }}>{moveCount}</div>
+            </div>
+          </div>
+
+          <div className="control-group">
+            <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
+              <span>Status</span>
+              {status === 'SOLVED' && <span style={{ color: '#32cd32' }}>✓ CLEAR!</span>}
+              {status === 'PLAYING' && <span style={{ color: 'var(--accent-blue)' }}>● PLAYING</span>}
+              {status === 'IDLE' && <span style={{ color: 'var(--text-secondary)' }}>- IDLE</span>}
+            </label>
+          </div>
+
+        <button 
+          className="primary-btn" 
+          onClick={handleRandomScramble}
+          style={{ background: status === 'PLAYING' ? '#333' : 'var(--accent-blue)' }}
+        >
+          {status === 'PLAYING' ? 'やり直す (Scramble)' : 'ランダムスクランブル'}
+        </button>
+
+        <VirtualPad onInputMove={handleInputMove} disabled={status === 'SOLVED'} />
+      </div>
+    </div>
+  </>
+);
+}
+
+export default App;
