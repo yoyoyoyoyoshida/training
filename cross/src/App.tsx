@@ -6,10 +6,15 @@ import { RubiksCube } from './components/RubiksCube';
 import { createInitialState, parseMoveString, performMoves, performMove, Move } from './utils/cubeState';
 import { checkCrossSolved } from './utils/crossValidator';
 import { VirtualPad } from './components/VirtualPad';
+import { RankingBoard } from './components/RankingBoard';
+import { useAuth } from './hooks/useAuth';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from './lib/firebase';
 
 type GameStatus = 'IDLE' | 'PLAYING' | 'SOLVED';
 
 function App() {
+  const { user, login } = useAuth();
   const [cubies, setCubies] = useState(() => performMove(createInitialState(), 'x2'));
   const [status, setStatus] = useState<GameStatus>('IDLE');
   const [moveCount, setMoveCount] = useState(0);
@@ -39,9 +44,21 @@ function App() {
       if (isSolved) {
         setStatus('SOLVED');
         stopTimer();
+        
+        // Save score if logged in
+        if (user) {
+          addDoc(collection(db, 'scores'), {
+            userId: user.uid,
+            userName: user.displayName || 'Anonymous',
+            moveCount: moveCount,
+            timeTaken: timeMs,
+            createdAt: serverTimestamp(),
+            // problemBatchId はフェーズ3で追加
+          }).catch(err => console.error("Score save failed:", err));
+        }
       }
     }
-  }, [cubies, status]);
+  }, [cubies, status, user, moveCount, timeMs]);
 
   const handleInputMove = (move: Move) => {
     if (status === 'SOLVED') return;
@@ -81,6 +98,16 @@ function App() {
           Cross <span className="brand-accent">Practice</span>
         </div>
         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+          {user ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <img src={user.photoURL || ''} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--accent-blue)' }} />
+              <span style={{ fontSize: '0.9rem', fontWeight: 700 }}>{user.displayName}</span>
+            </div>
+          ) : (
+            <button className="primary-btn" onClick={login} style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
+              Googleでログイン
+            </button>
+          )}
           <a href="/training/" className="back-link">← ポータルへ戻る</a>
         </div>
       </header>
@@ -127,6 +154,8 @@ function App() {
         </button>
 
         <VirtualPad onInputMove={handleInputMove} disabled={status === 'SOLVED'} />
+        
+        <RankingBoard />
       </div>
     </div>
   </>
