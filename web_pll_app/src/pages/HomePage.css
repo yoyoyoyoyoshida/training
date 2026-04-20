@@ -72,19 +72,47 @@
 .home__hero {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
   align-items: center;
+  padding: 1rem 0;
 }
 
 .home__title {
   margin: 0;
-  font-size: clamp(2.4rem, 6vw, 5rem);
+  font-size: clamp(2.2rem, 5.5vw, 4.4rem);
   font-weight: 800;
   color: #ffffff;
   text-align: center;
   line-height: 1.1;
   letter-spacing: -0.02em;
   text-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+}
+
+.home__hero-image {
+  max-width: 240px;
+  width: 100%;
+  aspect-ratio: 1.1 / 1; /* Slightly wider to match cube perspective */
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  animation: floatHero 6s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home__hero-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(2.5); /* Extremely deep zoom for absolute margin removal */
+  object-position: center 45%; /* Slightly adjust vertical position if needed */
+}
+
+@keyframes floatHero {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
 .home__subtitle {
@@ -100,7 +128,29 @@
 
 .home__subtitle-arrow {
   font-size: 1.2rem;
-  color: rgba(59, 130, 246, 0.7);
+  color: #32cd32;
+}
+
+.home__app-trigger {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+.home__app-trigger:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(50, 205, 50, 0.5);
 }
 
 .home__cta-cluster {
@@ -203,6 +253,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
+  padding: 0 0.5rem;
 }
 .home__actions .action-card.is-highlight {
   border-width: 3px;
@@ -216,5 +267,215 @@
 
   .home__hero-qr {
     width: 100%;
+  }
+}
+
+  .home__hero-qr {
+    width: 100%;
+  }
+}
+
+/* Modal Styles */
+.home__modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1.5rem;
+}
+
+.home__modal {
+  background: #111;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 28px;
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  text-align: center;
+  animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.9) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.home__modal h3 {
+  color: white;
+  margin: 0 0 0.5rem;
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.home__modal p {
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 2rem;
+  font-size: 0.95rem;
+}
+
+.home__modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.home__modal-qr {
+  background: white;
+  padding: 1rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.home__modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.2rem;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.home__modal-close:hover {
+  color: white;
+}
+
+/* Highlight Challenge Section */
+.home__highlight-challenge {
+  padding: 0 1.2rem;
+  margin-bottom: 1.5rem;
+}
+
+.discovery-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  display: flex;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  max-width: 680px;
+  margin: 0 auto;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.discovery-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(50, 205, 50, 0.4);
+}
+
+.discovery-card__visual {
+  flex: 0 0 220px;
+  position: relative;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.discovery-card__visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+  transition: transform 0.8s ease;
+}
+
+.discovery-card:hover .discovery-card__visual img {
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+.discovery-card__tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.discovery-card__body {
+  flex: 1;
+  padding: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.discovery-card__title {
+  margin: 0 0 0.8rem;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.discovery-card__text {
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.discovery-card__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.difficulty-label {
+  font-size: 0.75rem;
+  font-weight: 900;
+  color: #32cd32;
+  letter-spacing: 0.1em;
+}
+
+.difficulty-meter {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.difficulty-meter span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #32cd32, #facc15);
+  box-shadow: 0 0 10px rgba(50, 205, 50, 0.5);
+}
+
+@media (max-width: 600px) {
+  .discovery-card {
+    flex-direction: column;
+  }
+  .discovery-card__visual {
+    flex: 0 0 180px;
+  }
+  .discovery-card__body {
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .difficulty-meter {
+    margin: 0 auto;
+    width: 60%;
   }
 }

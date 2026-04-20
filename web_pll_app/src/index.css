@@ -30,7 +30,8 @@ button {
   font-family: inherit;
 }
 
-img {
+img, svg, a {
   max-width: 100%;
-  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
 }

@@ -10,7 +10,6 @@
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
   transition: all 0.3s ease;
   color: #ffffff;
-  overflow: hidden;
 }
 
 .action-card:hover {
@@ -41,6 +40,7 @@
   border-radius: 4px;
   box-shadow: 0 4px 15px rgba(50, 205, 50, 0.3);
   transform: rotate(-5deg);
+  z-index: 2;
 }
 
 .action-card__body {

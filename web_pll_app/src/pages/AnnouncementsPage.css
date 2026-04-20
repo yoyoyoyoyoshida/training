@@ -5,30 +5,33 @@
 }
 
 .announcements__header {
-  background: rgba(15, 23, 42, 0.88);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
   color: white;
   padding: 2rem 2.4rem;
   border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .announcements__header p {
   margin-top: 0.75rem;
   max-width: 640px;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .announcements__placeholder,
 .announcements__error {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
   border-radius: 22px;
-  border: 1px solid rgba(148, 163, 184, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 1.6rem 2rem;
-  box-shadow: 0 24px 52px -36px rgba(15, 23, 42, 0.35);
+  box-shadow: 0 24px 52px rgba(0, 0, 0, 0.5);
 }
 
 .announcements__error {
   border-color: rgba(239, 68, 68, 0.4);
-  color: rgba(185, 28, 28, 0.9);
+  color: #fca5a5;
 }
 
 .announcements__list {
@@ -38,17 +41,18 @@
 }
 
 .announcements__card {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
   border-radius: 22px;
-  border: 1px solid rgba(148, 163, 184, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 1.6rem 2rem;
-  box-shadow: 0 20px 45px -32px rgba(15, 23, 42, 0.4);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
 }
 
 .announcements__card time {
   display: block;
   font-size: 0.85rem;
-  color: rgba(15, 23, 42, 0.6);
+  color: rgba(255, 255, 255, 0.5);
   margin-bottom: 0.5rem;
 }
 
