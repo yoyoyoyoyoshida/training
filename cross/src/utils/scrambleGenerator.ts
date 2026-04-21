@@ -10,10 +10,10 @@ function mulberry32(a: number) {
 }
 
 export function getDailyScramble(): { scramble: string[], batchId: string } {
-  // 6時間単位でブロックを切り替える
-  const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
-  const currentPeriod = Math.floor(Date.now() / SIX_HOURS_MS);
-  const batchId = `BLOCK_${currentPeriod}`; // e.g. BLOCK_584983
+  // 24時間単位（1日1問）でブロックを切り替える
+  const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+  const currentPeriod = Math.floor(Date.now() / TWENTY_FOUR_HOURS_MS);
+  const batchId = `DAILY_${currentPeriod}`; // e.g. DAILY_19830
   
   // Seed the PRNG with the current 6-hour period
   const rng = mulberry32(currentPeriod);

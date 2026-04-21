@@ -7,9 +7,15 @@ interface Score {
   userName: string;
   moveCount: number;
   timeTaken: number;
+  moveLog?: string[]; // 追加：手順ログ
 }
 
-export function RankingBoard({ batchId }: { batchId: string }) {
+interface RankingBoardProps {
+  batchId: string;
+  onWatchReplay?: (moves: string[], name: string) => void; // 追加：再生用ハンドラ
+}
+
+export function RankingBoard({ batchId, onWatchReplay }: RankingBoardProps) {
   const [scores, setScores] = useState<Score[]>([]);
 
   useEffect(() => {
@@ -28,7 +34,8 @@ export function RankingBoard({ batchId }: { batchId: string }) {
           id: doc.id,
           userName: data.userName,
           moveCount: data.moveCount,
-          timeTaken: data.timeTaken
+          timeTaken: data.timeTaken,
+          moveLog: data.moveLog, // 手順ログを取得
         });
       });
       
@@ -63,17 +70,31 @@ export function RankingBoard({ batchId }: { batchId: string }) {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', overflowY: 'auto', flex: 1, paddingRight: '5px' }}>
           {scores.map((score, index) => (
-            <div key={score.id} style={{ display: 'flex', alignItems: 'center', padding: '0.6rem 0.8rem', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div key={score.id} style={{ display: 'flex', alignItems: 'center', padding: '0.6rem 0.8rem', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', gap: '10px' }}>
               <div style={{ width: '30px', fontWeight: 800, color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : 'var(--text-secondary)' }}>
                 #{index + 1}
               </div>
-              <div style={{ flex: 1, fontWeight: 700, fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginRight: '10px' }}>
+              <div style={{ flex: 1, fontWeight: 700, fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {score.userName}
               </div>
               <div style={{ textAlign: 'right', fontSize: '0.9rem', fontFamily: 'monospace', fontWeight: 800 }}>
                 <span style={{ color: 'var(--accent-blue)', marginRight: '8px' }}>{score.moveCount}手</span>
                 <span style={{ color: '#fff' }}>{formatTime(score.timeTaken)}s</span>
               </div>
+              {score.moveLog && onWatchReplay && (
+                <button 
+                  onClick={() => onWatchReplay(score.moveLog!, score.userName)}
+                  style={{ 
+                    background: 'var(--accent-blue)', color: '#fff', border: 'none', 
+                    borderRadius: '6px', padding: '4px 8px', fontSize: '0.65rem', cursor: 'pointer',
+                    fontWeight: 800, opacity: 0.8
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
+                  onMouseOut={(e) => e.currentTarget.style.opacity = '0.8'}
+                >
+                  再生 👁️
+                </button>
+              )}
             </div>
           ))}
         </div>

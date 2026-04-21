@@ -42,6 +42,15 @@ body {
   z-index: 10;
 }
 
+@media (max-width: 600px) {
+  .app-header {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+}
+
 .brand {
   font-weight: 800;
   font-size: 1.5rem;
@@ -70,16 +79,36 @@ body {
   flex-grow: 1;
   display: flex;
   position: relative;
+  overflow: hidden; /* 全体のスクロールを防ぐ */
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    flex-direction: column;
+    overflow-y: auto; /* 縦並びの時は全体をスクロール可能に */
+  }
 }
 
 .scene-container {
   flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0; /* これにより、画面が狭まった時にパネルを押し出さずに自分が縮む */
   position: relative;
   background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
+  min-height: 300px; /* モバイル等で潰れないように最低高さを確保 */
+}
+
+@media (max-width: 1024px) {
+  .scene-container {
+    height: 50vh; /* 画面の半分を3Dビューに */
+    flex-shrink: 0;
+    min-height: 300px;
+  }
 }
 
 .controls-panel {
   width: 400px;
+  flex-shrink: 0; /* 幅が勝手に縮まないように固定 */
   background: rgba(10, 10, 10, 0.8);
   backdrop-filter: blur(20px);
   border-left: 1px solid var(--card-border);
@@ -90,6 +119,16 @@ body {
   z-index: 10;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+@media (max-width: 1024px) {
+  .controls-panel {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--card-border);
+    padding: 1.5rem;
+    overflow-y: visible; /* 親のスクロールに任せる */
+  }
 }
 
 .control-group {

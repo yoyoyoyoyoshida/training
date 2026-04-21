@@ -12,7 +12,7 @@ import { ProfileModal } from './components/ProfileModal';
 import { useAuth } from './hooks/useAuth';
 import { useProfile } from './hooks/useProfile';
 import { getDailyScramble } from './utils/scrambleGenerator';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { db } from './lib/firebase';
 
 type GameStatus = 'IDLE' | 'PLAYING' | 'SOLVED';
@@ -26,9 +26,30 @@ function App() {
   const [currentBatchId, setCurrentBatchId] = useState(() => getDailyScramble().batchId);
   const [moveCount, setMoveCount] = useState(0);
   const [timeMs, setTimeMs] = useState(0);
+  const [moveLog, setMoveLog] = useState<Move[]>([]); 
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [replayData, setReplayData] = useState<{ moves: Move[], userName: string } | null>(null);
+  const [hasCompletedDaily, setHasCompletedDaily] = useState(false); // 追加：今日の課題をクリアしたか
   const timerRef = useRef<number | null>(null);
+
+  // 今日の課題をクリア済みかチェックする
+  useEffect(() => {
+    if (user && currentBatchId.startsWith('DAILY_')) {
+      const checkCompletion = async () => {
+        const q = query(
+          collection(db, 'scores'),
+          where('userId', '==', user.uid),
+          where('batchId', '==', currentBatchId)
+        );
+        const snap = await getDocs(q);
+        setHasCompletedDaily(!snap.empty);
+      };
+      checkCompletion();
+    } else {
+      setHasCompletedDaily(false);
+    }
+  }, [user, currentBatchId]);
 
   const startTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -66,13 +87,17 @@ function App() {
         userName: displayName,
         moveCount: moveCount,
         timeTaken: timeMs,
+        moveLog: moveLog, // 追加：手順を保存
         batchId: currentBatchId,
         createdAt: serverTimestamp(),
       });
 
-      // ログイン中ならプロフィール名を更新（次回のために保存）
       if (user) {
         await updateProfileData(user.uid, displayName);
+        // 今日の課題ならクリアフラグを立てる
+        if (currentBatchId.startsWith('DAILY_')) {
+          setHasCompletedDaily(true);
+        }
       }
       
       setIsResultModalOpen(false);
@@ -89,8 +114,47 @@ function App() {
     }
   };
 
+  const handleWatchReplay = async (moves: string[], solveName: string, scramble: string[]) => {
+    // 権限制限チェック
+    if (!user) {
+      alert("リプレイを視聴するにはGoogleログインが必要です。");
+      return;
+    }
+    if (!hasCompletedDaily) {
+      alert("まずはご自身で「今日の1問」をクリアして、スコアを登録してください！（ネタバレ防止のため）");
+      return;
+    }
+
+    // リプレイ開始：まず問題を再現
+    stopTimer();
+    const initialState = performMove(createInitialState(), 'x2');
+    setCubies(performMoves(initialState, scramble));
+    setStatus('IDLE');
+    setMoveCount(0);
+    setTimeMs(0);
+    setReplayData({ moves, userName: solveName });
+
+    // 1手ずつ再生
+    let currentCube = performMoves(initialState, scramble);
+    for (let i = 0; i < moves.length; i++) {
+      // 途中で停止していたら抜ける
+      if (!replayData && i > 0) break; 
+      
+      await new Promise(r => setTimeout(r, 600)); // 再生速度
+      const m = moves[i];
+      currentCube = performMove(currentCube, m);
+      setCubies(currentCube);
+      setMoveCount(i + 1);
+    }
+    
+    // 終了後に少し待ってリプレイモードをクリア
+    setTimeout(() => {
+      setReplayData(null);
+    }, 2000);
+  };
+
   const handleInputMove = (move: Move) => {
-    if (status === 'SOLVED') return;
+    if (status === 'SOLVED' || replayData) return; // リプレイ中はガード
 
     // x, y, z などの全体持ち替え以外は全て物理手（1手）としてカウント
     const mCore = move.replace(/['2\sw]/gi, '').toLowerCase();
@@ -103,30 +167,37 @@ function App() {
     setCubies(prev => performMove(prev, move));
     if (isPhysical) {
       setMoveCount(prev => prev + 1);
+      setMoveLog(prev => [...prev, move]); // ログに追加
+    } else {
+      setMoveLog(prev => [...prev, move]); // 持ち替えもリプレイ再現のために保存
     }
+  };
+
+  const resetGameStates = () => {
+    stopTimer();
+    setMoveCount(0);
+    setTimeMs(0);
+    setMoveLog([]);
+    setReplayData(null);
   };
 
   const handleRandomScramble = () => {
     const basicMoves = ['R', "R'", 'L', "L'", 'U', "U'", 'D', "D'", 'F', "F'", 'B', "B'"];
     const scramble = Array.from({ length: 15 }, () => basicMoves[Math.floor(Math.random() * basicMoves.length)]);
     
-    stopTimer();
+    resetGameStates();
     const initialState = performMove(createInitialState(), 'x2');
     setCubies(performMoves(initialState, scramble));
     setStatus('IDLE');
-    setMoveCount(0);
-    setTimeMs(0);
-    setCurrentBatchId('FREE_PRACTICE_' + Date.now()); // Free practice moves get random unique batch so they don't corrupt daily rankings
+    setCurrentBatchId('FREE_PRACTICE_' + Date.now()); 
   };
 
   const handleDailyScramble = () => {
     const daily = getDailyScramble();
-    stopTimer();
+    resetGameStates();
     const initialState = performMove(createInitialState(), 'x2');
     setCubies(performMoves(initialState, daily.scramble));
     setStatus('IDLE');
-    setMoveCount(0);
-    setTimeMs(0);
     setCurrentBatchId(daily.batchId);
   };
 
@@ -196,18 +267,18 @@ function App() {
             </label>
           </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <button 
             className="primary-btn" 
             onClick={handleDailyScramble}
-            style={{ flex: 1.5, background: 'var(--accent-green)', color: '#000' }}
+            style={{ flex: '1.5 0 200px', background: 'var(--accent-green)', color: '#000' }}
           >
-            最新の課題 (全国共通)
+            今日の1問 (全国共通)
           </button>
           <button 
             className="primary-btn" 
             onClick={handleRandomScramble}
-            style={{ flex: 1, background: '#333', fontSize: '0.9rem' }}
+            style={{ flex: '1 0 150px', background: '#333', fontSize: '0.9rem' }}
           >
             フリートレーニング
           </button>
@@ -215,8 +286,38 @@ function App() {
 
         <VirtualPad onInputMove={handleInputMove} disabled={status === 'SOLVED'} />
         
-        <RankingBoard batchId={currentBatchId} />
+        <RankingBoard 
+          batchId={currentBatchId} 
+          onWatchReplay={(moves, name) => {
+            const daily = getDailyScramble();
+            // batchIdが一致する場合のみ再生可能（または過去のスクランブルを保存する仕組みが必要ですが、まずは現チャレンジ用）
+            if (currentBatchId === daily.batchId) {
+              handleWatchReplay(moves, name, daily.scramble);
+            } else {
+              alert("現在の課題以外のリプレイ再生は準備中です。");
+            }
+          }} 
+        />
       </div>
+
+      {replayData && (
+        <div style={{
+          position: 'fixed', top: '100px', left: '50%', transform: 'translateX(-50%)',
+          background: 'rgba(0,122,255,0.9)', color: '#fff', padding: '1rem 2rem',
+          borderRadius: '50px', fontWeight: 800, zIndex: 1000, display: 'flex', gap: '1rem',
+          alignItems: 'center', boxShadow: '0 10px 30px rgba(0,122,255,0.4)',
+          border: '2px solid #fff'
+        }}>
+          <span className="pulse">● REPLAYING</span>
+          <span>{replayData.userName}'s Solve</span>
+          <button 
+            onClick={() => setReplayData(null)}
+            style={{ background: '#fff', color: 'var(--accent-blue)', border: 'none', borderRadius: '20px', padding: '2px 10px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}
+          >
+            STOP
+          </button>
+        </div>
+      )}
 
       <ResultModal 
         isOpen={isResultModalOpen}
