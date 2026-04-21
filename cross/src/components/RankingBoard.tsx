@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, Timestamp, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 interface Score {
@@ -7,98 +7,137 @@ interface Score {
   userName: string;
   moveCount: number;
   timeTaken: number;
-  moveLog?: string[]; // 追加：手順ログ
+  moveLog?: string[];
+}
+
+interface UserStat {
+  userId: string;
+  userName: string;
+  count: number;
 }
 
 interface RankingBoardProps {
   batchId: string;
-  onWatchReplay?: (moves: string[], name: string) => void; // 追加：再生用ハンドラ
+  onWatchReplay?: (moves: string[], name: string) => void;
 }
 
 export function RankingBoard({ batchId, onWatchReplay }: RankingBoardProps) {
-  const [scores, setScores] = useState<Score[]>([]);
+  const [dailyTop, setDailyTop] = useState<Score | null>(null);
+  const [monthlyTop, setMonthlyTop] = useState<UserStat[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 複合インデックスを避けるため、特定の配信期間（batchId）のデータを全て取得し、
-    // クライアント側で全てのソート（手数 -> タイム）を行います。
-    const q = query(
+    // 1. 今日の1位を取得 (Real-time)
+    const qDaily = query(
       collection(db, 'scores'),
       where('batchId', '==', batchId)
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribeDaily = onSnapshot(qDaily, (snapshot) => {
       let parsed: Score[] = [];
       snapshot.forEach(doc => {
         const data = doc.data();
-        parsed.push({
-          id: doc.id,
-          userName: data.userName,
-          moveCount: data.moveCount,
-          timeTaken: data.timeTaken,
-          moveLog: data.moveLog, // 手順ログを取得
-        });
+        parsed.push({ id: doc.id, ...data } as Score);
       });
-      
-      // クライアント側でタイムによるタイブレークを行い、Top 10に絞る
       parsed.sort((a, b) => {
         if (a.moveCount !== b.moveCount) return a.moveCount - b.moveCount;
         return a.timeTaken - b.timeTaken;
       });
-      parsed = parsed.slice(0, 10);
-      
-      setScores(parsed);
-    }, (error) => {
-      console.error("Ranking fetch error:", error);
+      setDailyTop(parsed[0] || null);
+      setLoading(false);
     });
 
-    return () => unsubscribe();
+    // 2. 今月の練習量 Top 3 を取得 (One-time)
+    const fetchMonthly = async () => {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const qMonthly = query(
+        collection(db, 'scores'),
+        where('createdAt', '>=', Timestamp.fromDate(startOfMonth)),
+        orderBy('createdAt', 'desc')
+      );
+      const snap = await getDocs(qMonthly);
+      const userMap = new Map<string, { name: string, count: number }>();
+      snap.forEach(doc => {
+        const d = doc.data();
+        if (d.batchId && String(d.batchId).startsWith('FREE_PRACTICE_')) {
+          const current = userMap.get(d.userId) || { name: d.userName, count: 0 };
+          userMap.set(d.userId, { name: d.userName, count: current.count + 1 });
+        }
+      });
+      const stats = Array.from(userMap.entries()).map(([uid, data]) => ({
+        userId: uid,
+        userName: data.name,
+        count: data.count
+      }));
+      stats.sort((a, b) => b.count - a.count);
+      setMonthlyTop(stats.slice(0, 3));
+    };
+    
+    fetchMonthly();
+
+    return () => unsubscribeDaily();
   }, [batchId]);
 
   const formatTime = (ms: number) => (ms / 1000).toFixed(2);
 
   return (
-    <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '1.5rem', display: 'flex', flexDirection: 'column', flex: 1, minHeight: '200px' }}>
-      <h3 style={{ fontSize: '1rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span>Top 10 Ranking</span>
-        <span style={{ fontSize: '0.7rem', color: 'var(--accent-blue)', background: 'rgba(0,122,255,0.1)', padding: '2px 6px', borderRadius: '4px' }}>LIVE</span>
-      </h3>
-      
-      {scores.length === 0 ? (
-        <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textAlign: 'center', marginTop: '2rem' }}>
-          待機中... またはスコアがありません
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', overflowY: 'auto', flex: 1, paddingRight: '5px' }}>
-          {scores.map((score, index) => (
-            <div key={score.id} style={{ display: 'flex', alignItems: 'center', padding: '0.6rem 0.8rem', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', gap: '10px' }}>
-              <div style={{ width: '30px', fontWeight: 800, color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : 'var(--text-secondary)' }}>
-                #{index + 1}
-              </div>
-              <div style={{ flex: 1, fontWeight: 700, fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {score.userName}
-              </div>
-              <div style={{ textAlign: 'right', fontSize: '0.9rem', fontFamily: 'monospace', fontWeight: 800 }}>
-                <span style={{ color: 'var(--accent-blue)', marginRight: '8px' }}>{score.moveCount}手</span>
-                <span style={{ color: '#fff' }}>{formatTime(score.timeTaken)}s</span>
-              </div>
-              {score.moveLog && onWatchReplay && (
-                <button 
-                  onClick={() => onWatchReplay(score.moveLog!, score.userName)}
-                  style={{ 
-                    background: 'var(--accent-blue)', color: '#fff', border: 'none', 
-                    borderRadius: '6px', padding: '4px 8px', fontSize: '0.65rem', cursor: 'pointer',
-                    fontWeight: 800, opacity: 0.8
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.opacity = '1'}
-                  onMouseOut={(e) => e.currentTarget.style.opacity = '0.8'}
-                >
-                  再生 👁️
-                </button>
-              )}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
+      {/* Daily Top Section */}
+      <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '1.2rem' }}>
+        <h3 style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="8" r="7" />
+              <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+            </svg>
+            <span>Today's #1</span>
+          </div>
+          <span style={{ fontSize: '0.6rem', color: 'var(--accent-green)', background: 'rgba(50,205,50,0.1)', padding: '2px 6px', borderRadius: '4px' }}>LIVE</span>
+        </h3>
+        {dailyTop ? (
+          <div style={{ display: 'flex', alignItems: 'center', padding: '0.6rem 0.8rem', background: 'rgba(50,205,50,0.05)', borderRadius: '8px', border: '1px solid rgba(50,205,50,0.1)', gap: '10px' }}>
+            <div style={{ flex: 1, fontWeight: 800, fontSize: '0.95rem', color: '#fff' }}>{dailyTop.userName}</div>
+            <div style={{ textAlign: 'right', fontSize: '0.9rem', fontFamily: 'monospace', fontWeight: 800 }}>
+              <span style={{ color: 'var(--accent-green)', marginRight: '8px' }}>{dailyTop.moveCount}手</span>
+              <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}>{formatTime(dailyTop.timeTaken)}s</span>
             </div>
-          ))}
+            {dailyTop.moveLog && onWatchReplay && (
+              <button 
+                onClick={() => onWatchReplay(dailyTop.moveLog!, dailyTop.userName)}
+                style={{ background: 'var(--accent-green)', color: '#000', border: 'none', borderRadius: '4px', padding: '2px 6px', fontSize: '0.6rem', cursor: 'pointer', fontWeight: 800 }}
+              >
+                ▶
+              </button>
+            )}
+          </div>
+        ) : (
+          <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', textAlign: 'center' }}>{loading ? '読み込み中...' : '記録なし'}</div>
+        )}
+      </div>
+
+      {/* Monthly Stats Section */}
+      <div style={{ background: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)', padding: '1.2rem' }}>
+        <h3 style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF8800" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.203 1.15-3.003C7.5 14 8.5 14.5 8.5 14.5Z" />
+          </svg>
+          <span>Monthly Top 3</span>
+        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          {monthlyTop.length > 0 ? (
+            monthlyTop.map((s, i) => (
+              <div key={s.userId} style={{ display: 'flex', alignItems: 'center', padding: '0.5rem 0.8rem', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', fontSize: '0.85rem' }}>
+                <div style={{ width: '24px', fontWeight: 800, color: i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : '#CD7F32' }}>#{i+1}</div>
+                <div style={{ flex: 1, fontWeight: 600 }}>{s.userName}</div>
+                <div style={{ fontWeight: 800, color: 'var(--accent-green)', fontSize: '0.8rem' }}>{s.count}回</div>
+              </div>
+            ))
+          ) : (
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', textAlign: 'center' }}>記録なし</div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

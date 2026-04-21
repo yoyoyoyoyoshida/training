@@ -14,12 +14,13 @@ import { useProfile } from './hooks/useProfile';
 import { getDailyScramble } from './utils/scrambleGenerator';
 import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { db } from './lib/firebase';
+import { GlobalRankingModal } from './components/GlobalRankingModal';
 
 type GameStatus = 'IDLE' | 'PLAYING' | 'SOLVED';
 
 function App() {
   const { user, login } = useAuth();
-  const { profileName, updateProfileData } = useProfile(user);
+  const { profileName, updateProfileData, isNewUser } = useProfile(user);
   const [isLogoHover, setIsLogoHover] = useState(false);
   
   const [cubies, setCubies] = useState(() => performMove(createInitialState(), 'x2'));
@@ -30,9 +31,18 @@ function App() {
   const [moveLog, setMoveLog] = useState<Move[]>([]); 
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isGlobalRankingOpen, setIsGlobalRankingOpen] = useState(false);
   const [replayData, setReplayData] = useState<{ moves: Move[], userName: string } | null>(null);
   const [hasCompletedDaily, setHasCompletedDaily] = useState(false); // 追加：今日の課題をクリアしたか
   const timerRef = useRef<number | null>(null);
+  const replayRef = useRef<boolean>(false);
+
+  // 初回ログイン時に名前設定モーダルを強制表示
+  useEffect(() => {
+    if (isNewUser) {
+      setIsProfileModalOpen(true);
+    }
+  }, [isNewUser]);
 
   // 今日の課題をクリア済みかチェックする
   useEffect(() => {
@@ -128,6 +138,7 @@ function App() {
 
     // リプレイ開始：まず問題を再現
     stopTimer();
+    replayRef.current = true;
     const initialState = performMove(createInitialState(), 'x2');
     setCubies(performMoves(initialState, scramble));
     setStatus('IDLE');
@@ -138,19 +149,24 @@ function App() {
     // 1手ずつ再生
     let currentCube = performMoves(initialState, scramble);
     for (let i = 0; i < moves.length; i++) {
-      // 途中で停止していたら抜ける
-      if (!replayData && i > 0) break; 
+      // 途中で停止ボタンが押された（replayRefがfalseになった）ら中断
+      if (!replayRef.current) break; 
       
-      await new Promise(r => setTimeout(r, 600)); // 再生速度
+      await new Promise(r => setTimeout(r, 800)); // 再生速度を少し調整
+      
+      // 再度チェック
+      if (!replayRef.current) break;
+
       const m = moves[i];
       currentCube = performMove(currentCube, m);
-      setCubies(currentCube);
+      setCubies([...currentCube]); // 正しい配列展開記法に修正
       setMoveCount(i + 1);
     }
     
     // 終了後に少し待ってリプレイモードをクリア
     setTimeout(() => {
       setReplayData(null);
+      replayRef.current = false;
     }, 2000);
   };
 
@@ -243,6 +259,25 @@ function App() {
           Cross <span className="brand-accent">Practice</span>
         </div>
         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+          <button 
+            onClick={() => setIsGlobalRankingOpen(true)}
+            style={{ 
+              background: 'rgba(255,255,255,0.05)', border: '1px solid var(--card-border)',
+              color: '#fff', padding: '0.5rem 1rem', borderRadius: '8px', 
+              cursor: 'pointer', fontSize: '0.8rem', fontWeight: 800,
+              display: 'flex', alignItems: 'center', gap: '0.5rem'
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+              <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+              <path d="M4 22h16"></path>
+              <path d="M10 14.66V17c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-2.34"></path>
+              <path d="M12 22v-4"></path>
+              <path d="M17 4H7a2 2 0 0 0-2 2v3a7 7 0 0 0 14 0V6a2 2 0 0 0-2-2Z"></path>
+            </svg>
+            ランキング
+          </button>
           {user ? (
             <div 
               onClick={() => setIsProfileModalOpen(true)}
@@ -270,7 +305,7 @@ function App() {
 
       <div className="main-content">
         <div className="scene-container">
-          <Canvas camera={{ position: [5, 5, 8], fov: 45 }}>
+          <Canvas camera={{ position: [6, 6, 12], fov: 45 }}>
             <color attach="background" args={['#050505']} />
             <ambientLight intensity={0.8} />
             <directionalLight position={[5, 10, 7]} intensity={0.5} />
@@ -331,6 +366,25 @@ function App() {
             }
           }} 
         />
+
+        <footer style={{ 
+          textAlign: 'center', 
+          padding: '1.5rem 0 0.5rem', 
+          marginTop: 'auto',
+          fontSize: '0.7rem',
+          color: 'var(--text-secondary)',
+          borderTop: '1px solid rgba(255,255,255,0.05)'
+        }}>
+          <div style={{ marginBottom: '0.4rem' }}>&copy; 2026 GACHI-CUBE Training</div>
+          <a 
+            href="/training/privacy.html" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ color: 'var(--text-secondary)', textDecoration: 'underline' }}
+          >
+            プライバシーポリシー
+          </a>
+        </footer>
       </div>
 
       <VirtualPad onInputMove={handleInputMove} disabled={status === 'SOLVED'} />
@@ -346,7 +400,10 @@ function App() {
           <span className="pulse">● REPLAYING</span>
           <span>{replayData.userName}'s Solve</span>
           <button 
-            onClick={() => setReplayData(null)}
+            onClick={() => {
+              setReplayData(null);
+              replayRef.current = false;
+            }}
             style={{ background: '#fff', color: 'var(--accent-blue)', border: 'none', borderRadius: '20px', padding: '2px 10px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}
           >
             STOP
@@ -363,7 +420,6 @@ function App() {
         onClose={() => setIsResultModalOpen(false)}
         onSubmit={handleResultSubmit}
       />
-
       <ProfileModal 
         isOpen={isProfileModalOpen}
         currentName={profileName}
@@ -371,24 +427,14 @@ function App() {
         onSave={handleProfileSave}
       />
 
-      <footer style={{ 
-        textAlign: 'center', 
-        padding: '2rem 1rem', 
-        borderTop: '1px solid var(--card-border)',
-        marginTop: 'auto',
-        fontSize: '0.8rem',
-        color: 'var(--text-secondary)'
-      }}>
-        <div style={{ marginBottom: '0.5rem' }}>&copy; 2026 GACHI-CUBE Training</div>
-        <a 
-          href="/training/privacy.html" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          style={{ color: 'var(--text-secondary)', textDecoration: 'underline' }}
-        >
-          プライバシーポリシー
-        </a>
-      </footer>
+      <GlobalRankingModal 
+        isOpen={isGlobalRankingOpen}
+        onClose={() => setIsGlobalRankingOpen(false)}
+        onWatchReplay={(moves, name, scrambleStr) => {
+          setIsGlobalRankingOpen(false);
+          handleWatchReplay(moves, name, scrambleStr.split(' '));
+        }}
+      />
     </div>
   </>
 );

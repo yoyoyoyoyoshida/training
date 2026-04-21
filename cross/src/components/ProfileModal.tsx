@@ -32,9 +32,12 @@ export function ProfileModal({ isOpen, currentName, onClose, onSave }: ProfileMo
         maxWidth: '400px',
         boxShadow: '0 15px 40px rgba(0,0,0,0.6)'
       }}>
-        <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1.5rem', color: '#fff' }}>
-          表示名を変更
+        <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.5rem', color: '#fff' }}>
+          ランキング表示名を設定
         </h3>
+        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+          ※この名前は後からいつでも変更可能です。
+        </p>
         
         <div style={{ marginBottom: '2rem' }}>
           <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', display: 'block' }}>
@@ -47,7 +50,7 @@ export function ProfileModal({ isOpen, currentName, onClose, onSave }: ProfileMo
             style={{
               width: '100%',
               background: '#000',
-              border: '2px solid var(--card-border)',
+              border: '2px solid var(--accent-green)',
               borderRadius: '12px',
               padding: '1rem',
               color: '#fff',
@@ -55,7 +58,7 @@ export function ProfileModal({ isOpen, currentName, onClose, onSave }: ProfileMo
               fontWeight: 700,
               outline: 'none'
             }}
-            placeholder="新しい名前を入力..."
+            placeholder="お名前を入力..."
             autoFocus
           />
         </div>

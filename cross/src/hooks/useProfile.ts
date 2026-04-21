@@ -6,11 +6,13 @@ import { db } from '../lib/firebase';
 export function useProfile(user: User | null) {
   const [profileName, setProfileName] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [isNewUser, setIsNewUser] = useState(false);
 
   useEffect(() => {
     if (!user) {
       setProfileName('ゲスト');
       setLoading(false);
+      setIsNewUser(false);
       return;
     }
 
@@ -20,11 +22,12 @@ export function useProfile(user: User | null) {
 
       if (docSnap.exists()) {
         setProfileName(docSnap.data().displayName);
+        setIsNewUser(false);
       } else {
-        // 初期値としてGoogleの名前をセット
-        const initialName = user.displayName || '名無しのキューバー';
-        setProfileName(initialName);
-        await setDoc(docRef, { displayName: initialName }, { merge: true });
+        // 初回ユーザー: モーダルを表示させるためにフラグを立てる
+        // 自動保存はせず、ユーザーに入力を促す
+        setProfileName(user.displayName || '');
+        setIsNewUser(true);
       }
       setLoading(false);
     };
@@ -32,18 +35,12 @@ export function useProfile(user: User | null) {
     fetchProfile();
   }, [user]);
 
-  const updateProfileName = async (newName: string) => {
-    if (!user) return;
-    const docRef = doc(doc(db, 'users', user.uid));
-    await setDoc(docRef, { displayName: newName }, { merge: true });
-    setProfileName(newName);
-  };
-
   const updateProfileData = async (uid: string, name: string) => {
      const docRef = doc(db, 'users', uid);
      await setDoc(docRef, { displayName: name }, { merge: true });
      setProfileName(name);
+     setIsNewUser(false); // 保存されたら新規ユーザーではなくなる
   };
 
-  return { profileName, setProfileName, updateProfileData, loading };
+  return { profileName, setProfileName, updateProfileData, loading, isNewUser };
 }

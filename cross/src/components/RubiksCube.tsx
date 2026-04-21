@@ -229,8 +229,8 @@ export function RubiksCube({ cubies }: RubiksCubeProps) {
         <Text
           position={[0, 0, 0.05]}
           fontSize={2.5}
-          color="#32CD32"
-          fillOpacity={0.25}
+          color="#ffffff"
+          fillOpacity={0.8}
           anchorX="center"
           anchorY="middle"
           fontWeight={800}
