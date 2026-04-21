@@ -7,7 +7,7 @@ const FACE_COLORS = [
   '#FF0000', // 0: Right (Red)
   '#FF8800', // 1: Left (Orange)
   '#FFFFFF', // 2: Up (White)
-  '#FFCC00', // 3: Down (Yellow) - 少し深みのある黄色へ
+  '#FFE600', // 3: Down (Yellow)
   '#00BB00', // 4: Front (Green)
   '#0055FF', // 5: Back (Blue)
 ];

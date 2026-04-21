@@ -28,20 +28,33 @@ function FlickButton({ base, top, left, right, bottom, topRight, disabled, onSel
   };
 
   const moveInteraction = (x: number, y: number) => {
-    if (!isActive) return;
-    const dx = x - startPos.current.x;
-    const dy = y - startPos.current.y;
+    // アクティブな判定が必要な状態（フリック中またはホバー中）かチェック
+    if (!isActive && !isHovered) return;
+
+    let dx, dy;
+    if (isActive) {
+      dx = x - startPos.current.x;
+      dy = y - startPos.current.y;
+    } else {
+      // ホバー中の場合はボタンの中心からの相対距離を計算
+      const rect = buttonRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      dx = x - (rect.left + rect.width / 2);
+      dy = y - (rect.top + rect.height / 2);
+    }
+    
     const distance = Math.hypot(dx, dy);
 
     let current = base;
     if (distance > 25) {
       const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
-      // Define 8-way angular sectors roughly
-      if (angle > -30 && angle < 30 && right) current = right; // (Right)
-      else if (angle >= -90 && angle <= -30 && topRight) current = topRight; // (Top Right)
-      else if (angle < -90 && angle > -150 && top) current = top; // (Top)
-      else if (angle > 30 && angle < 150 && bottom) current = bottom; // (Bottom)
-      else if (left) current = left; // (Left default for everything else)
+      const normalizedAngle = (angle < 0 ? angle + 360 : angle);
+      
+      if (normalizedAngle >= 234 && normalizedAngle < 306) { if(top) current = top; }
+      else if (normalizedAngle >= 306 || normalizedAngle < 18) { if(topRight) current = topRight; }
+      else if (normalizedAngle >= 18 && normalizedAngle < 90) { if(right) current = right; }
+      else if (normalizedAngle >= 90 && normalizedAngle < 162) { if(bottom) current = bottom; }
+      else if (normalizedAngle >= 162 && normalizedAngle < 234) { if(left) current = left; }
     }
     setSelection(current);
   };
@@ -52,30 +65,44 @@ function FlickButton({ base, top, left, right, bottom, topRight, disabled, onSel
     onSelect(selection);
   };
 
-  const Petal = ({ label, position }: { label?: string, position: 'top'|'left'|'right'|'bottom'|'topRight'|'center' }) => {
+  const handlePointerLeave = () => {
+    setIsHovered(false);
+    setSelection(base); // 離れたら選択をセンターに戻す
+  };
+
+  const Petal = ({ label, angle }: { label?: string, angle: number | 'center' }) => {
     if (!label) return null;
     const isSelected = selection === label;
     const visible = isActive || isHovered;
+
+    const radius = 68; 
+    const isCenter = angle === 'center';
+    
+    const cos = isCenter ? 0 : Math.cos(((angle as number) * Math.PI) / 180);
+    const sin = isCenter ? 0 : Math.sin(((angle as number) * Math.PI) / 180);
+
     const posStyles: React.CSSProperties = {
       position: 'absolute',
-      width: '40px', height: '40px',
-      borderRadius: '8px',
+      width: isCenter ? '58px' : '46px',
+      height: isCenter ? '58px' : '46px',
+      borderRadius: '50%', // 完全な円形
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: isSelected ? 'var(--accent-blue)' : 'var(--card-bg)',
-      color: isSelected ? '#fff' : 'var(--text-primary)',
-      fontWeight: 'bold', fontSize: '1rem',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+      background: isSelected ? 'var(--accent-blue)' : (isCenter ? '#1a1a1a' : '#fff'),
+      color: isSelected ? '#fff' : (isCenter ? '#fff' : '#000'),
+      fontWeight: 800, 
+      fontSize: isCenter ? '1.2rem' : '0.9rem',
+      boxShadow: isSelected ? '0 0 25px var(--accent-blue)' : '0 4px 15px rgba(0,0,0,0.4)',
       opacity: visible ? 1 : 0, 
-      transition: 'opacity 0.15s, background 0.1s',
+      transform: isCenter 
+        ? 'translate(-50%, -50%)' 
+        : `translate(calc(-50% + ${cos * radius}px), calc(-50% + ${sin * radius}px)) scale(${isSelected ? 1.1 : 1})`,
+      transition: 'all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
       pointerEvents: 'none',
-      border: `1px solid ${isSelected ? '#fff' : 'var(--card-border)'}`,
+      border: isSelected ? '2px solid #fff' : 'none',
+      left: '50%',
+      top: '50%',
+      zIndex: isSelected ? 1000 : 1,
     };
-    if (position === 'center') { posStyles.top = '50%'; posStyles.left = '50%'; posStyles.transform = 'translate(-50%, -50%)'; posStyles.fontSize = '1.2rem'; }
-    if (position === 'top') { posStyles.top = '-50px'; posStyles.left = '50%'; posStyles.transform = 'translateX(-50%)'; }
-    if (position === 'bottom') { posStyles.bottom = '-50px'; posStyles.left = '50%'; posStyles.transform = 'translateX(-50%)'; }
-    if (position === 'left') { posStyles.left = '-50px'; posStyles.top = '50%'; posStyles.transform = 'translateY(-50%)'; }
-    if (position === 'right') { posStyles.right = '-50px'; posStyles.top = '50%'; posStyles.transform = 'translateY(-50%)'; }
-    if (position === 'topRight') { posStyles.right = '-40px'; posStyles.top = '-40px'; } // Diagonal placement
 
     return <div style={posStyles}>{label}</div>;
   };
@@ -84,13 +111,19 @@ function FlickButton({ base, top, left, right, bottom, topRight, disabled, onSel
     <div 
       style={{ position: 'relative', width: '100%', height: '60px' }}
       onPointerEnter={() => !disabled && setIsHovered(true)}
-      onPointerLeave={() => setIsHovered(false)}
+      onPointerMove={(e) => !isActive && isHovered && moveInteraction(e.clientX, e.clientY)}
+      onPointerLeave={handlePointerLeave}
     >
       <button
         ref={buttonRef}
         className={`virtual-btn ${isRot ? 'rot-btn' : ''}`}
         disabled={disabled}
-        style={{ width: '100%', height: '100%', position: 'absolute', zIndex: (isActive || isHovered) ? 10 : 1, touchAction: 'none' }}
+        style={{ 
+          width: '100%', height: '100%', position: 'absolute', zIndex: (isActive || isHovered) ? 10 : 1, touchAction: 'none',
+          borderRadius: '500px', // 外側のボタン枠も丸く
+          background: isHovered ? 'rgba(255,255,255,0.05)' : 'transparent',
+          border: '1px solid rgba(255,255,255,0.1)'
+        }}
         onPointerDown={(e) => {
           buttonRef.current?.setPointerCapture(e.pointerId);
           startInteraction(e.clientX, e.clientY);
@@ -105,17 +138,23 @@ function FlickButton({ base, top, left, right, bottom, topRight, disabled, onSel
         onPointerCancel={endInteraction}
         onContextMenu={(e) => e.preventDefault()}
       >
-        <span style={{ opacity: (isActive || isHovered) ? 0.3 : 1, transition: 'opacity 0.1s' }}>{base}</span>
+        <span style={{ 
+          opacity: (isActive || isHovered) ? 0 : 1, 
+          transition: 'opacity 0.1s',
+          fontSize: '1.2rem',
+          fontWeight: 800
+        }}>{base}</span>
       </button>
 
-      {/* Guide Petals */}
+      {/* Guide Petals: 画像に基づいた5角形サークル配置 */}
       <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 100 }}>
-        <Petal label={topRight} position="topRight" />
-        <Petal label={top} position="top" />
-        <Petal label={left} position="left" />
-        <Petal label={right} position="right" />
-        <Petal label={bottom} position="bottom" />
-        <Petal label={base} position="center" />
+        {/* 真上から時計回りに72度ずつ配分 */}
+        <Petal label={top} angle={-90} />    {/* 2  (真上) */}
+        <Petal label={topRight} angle={-18} /> {/* w2 (右上) */}
+        <Petal label={right} angle={54} />    {/* w  (右下) */}
+        <Petal label={bottom} angle={126} />    {/* w' (左下) */}
+        <Petal label={left} angle={198} />      {/* '  (左上) */}
+        <Petal label={base} angle="center" />
       </div>
     </div>
   );

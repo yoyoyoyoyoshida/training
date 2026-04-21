@@ -7,7 +7,10 @@ import { createInitialState, parseMoveString, performMoves, performMove, Move } 
 import { checkCrossSolved } from './utils/crossValidator';
 import { VirtualPad } from './components/VirtualPad';
 import { RankingBoard } from './components/RankingBoard';
+import { ResultModal } from './components/ResultModal';
+import { ProfileModal } from './components/ProfileModal';
 import { useAuth } from './hooks/useAuth';
+import { useProfile } from './hooks/useProfile';
 import { getDailyScramble } from './utils/scrambleGenerator';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './lib/firebase';
@@ -16,11 +19,15 @@ type GameStatus = 'IDLE' | 'PLAYING' | 'SOLVED';
 
 function App() {
   const { user, login } = useAuth();
+  const { profileName, updateProfileData } = useProfile(user);
+  
   const [cubies, setCubies] = useState(() => performMove(createInitialState(), 'x2'));
   const [status, setStatus] = useState<GameStatus>('IDLE');
   const [currentBatchId, setCurrentBatchId] = useState(() => getDailyScramble().batchId);
   const [moveCount, setMoveCount] = useState(0);
   const [timeMs, setTimeMs] = useState(0);
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const timerRef = useRef<number | null>(null);
 
   const startTimer = () => {
@@ -46,21 +53,41 @@ function App() {
       if (isSolved) {
         setStatus('SOLVED');
         stopTimer();
-        
-        // Save score if logged in
-        if (user) {
-          addDoc(collection(db, 'scores'), {
-            userId: user.uid,
-            userName: user.displayName || 'Anonymous',
-            moveCount: moveCount,
-            timeTaken: timeMs,
-            batchId: currentBatchId,
-            createdAt: serverTimestamp(),
-          }).catch(err => console.error("Score save failed:", err));
-        }
+        setTimeout(() => setIsResultModalOpen(true), 500); // 完了の余韻のために少し遅らせる
       }
     }
-  }, [cubies, status, user, moveCount, timeMs, currentBatchId]);
+  }, [cubies, status]);
+
+  const handleResultSubmit = async (displayName: string) => {
+    // スコア保存
+    try {
+      await addDoc(collection(db, 'scores'), {
+        userId: user?.uid || 'guest_' + Date.now(),
+        userName: displayName,
+        moveCount: moveCount,
+        timeTaken: timeMs,
+        batchId: currentBatchId,
+        createdAt: serverTimestamp(),
+      });
+
+      // ログイン中ならプロフィール名を更新（次回のために保存）
+      if (user) {
+        await updateProfileData(user.uid, displayName);
+      }
+      
+      setIsResultModalOpen(false);
+    } catch (err) {
+      console.error("Score save failed:", err);
+      alert("保存に失敗しました。ルール設定等を確認してください。");
+    }
+  };
+
+  const handleProfileSave = async (newName: string) => {
+    if (user) {
+      await updateProfileData(user.uid, newName);
+      setIsProfileModalOpen(false);
+    }
+  };
 
   const handleInputMove = (move: Move) => {
     if (status === 'SOLVED') return;
@@ -113,9 +140,20 @@ function App() {
         </div>
         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
           {user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+            <div 
+              onClick={() => setIsProfileModalOpen(true)}
+              style={{ 
+                display: 'flex', alignItems: 'center', gap: '0.8rem', 
+                cursor: 'pointer', padding: '4px 8px', borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}
+              className="header-user-profile"
+            >
               <img src={user.photoURL || ''} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--accent-blue)' }} />
-              <span style={{ fontSize: '0.9rem', fontWeight: 700 }}>{user.displayName}</span>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#fff' }}>{profileName}</span>
+                <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>クリックで名前変更</span>
+              </div>
             </div>
           ) : (
             <button className="primary-btn" onClick={login} style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
@@ -179,6 +217,23 @@ function App() {
         
         <RankingBoard batchId={currentBatchId} />
       </div>
+
+      <ResultModal 
+        isOpen={isResultModalOpen}
+        timeMs={timeMs}
+        moveCount={moveCount}
+        user={user}
+        initialName={profileName}
+        onClose={() => setIsResultModalOpen(false)}
+        onSubmit={handleResultSubmit}
+      />
+
+      <ProfileModal 
+        isOpen={isProfileModalOpen}
+        currentName={profileName}
+        onClose={() => setIsProfileModalOpen(false)}
+        onSave={handleProfileSave}
+      />
     </div>
   </>
 );
