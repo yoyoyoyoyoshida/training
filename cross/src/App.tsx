@@ -20,6 +20,7 @@ type GameStatus = 'IDLE' | 'PLAYING' | 'SOLVED';
 function App() {
   const { user, login } = useAuth();
   const { profileName, updateProfileData } = useProfile(user);
+  const [isLogoHover, setIsLogoHover] = useState(false);
   
   const [cubies, setCubies] = useState(() => performMove(createInitialState(), 'x2'));
   const [status, setStatus] = useState<GameStatus>('IDLE');
@@ -206,7 +207,39 @@ function App() {
   return (
     <>
       <header className="app-header">
-        <div className="brand">
+        <div 
+          className="brand"
+          onMouseEnter={() => setIsLogoHover(true)}
+          onMouseLeave={() => setIsLogoHover(false)}
+          style={{ cursor: 'pointer' }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{
+              transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+              transform: isLogoHover ? 'rotate(240deg)' : 'rotate(0deg)',
+            }}
+          >
+            {/* Red Segment */}
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="#ff0000" strokeDasharray="12.16 48.64" strokeDashoffset="0" />
+            {/* Blue Segment */}
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="#0055ff" strokeDasharray="12.16 48.64" strokeDashoffset="-12.16" />
+            {/* Orange Segment */}
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="#ff8800" strokeDasharray="12.16 48.64" strokeDashoffset="-24.32" />
+            {/* Green Segment */}
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="#00bb00" strokeDasharray="12.16 48.64" strokeDashoffset="-36.48" />
+            {/* Yellow Segment */}
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="#ffe600" strokeDasharray="12.16 48.64" strokeDashoffset="-48.64" />
+            {/* Y Inner */}
+            <path d="M12 12.5V19M12 12.5L6 9M12 12.5L18 9" stroke="white" strokeWidth="2" strokeLinecap="round" />
+          </svg>
           Cross <span className="brand-accent">Practice</span>
         </div>
         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
@@ -337,6 +370,25 @@ function App() {
         onClose={() => setIsProfileModalOpen(false)}
         onSave={handleProfileSave}
       />
+
+      <footer style={{ 
+        textAlign: 'center', 
+        padding: '2rem 1rem', 
+        borderTop: '1px solid var(--card-border)',
+        marginTop: 'auto',
+        fontSize: '0.8rem',
+        color: 'var(--text-secondary)'
+      }}>
+        <div style={{ marginBottom: '0.5rem' }}>&copy; 2026 GACHI-CUBE Training</div>
+        <a 
+          href="/training/privacy.html" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{ color: 'var(--text-secondary)', textDecoration: 'underline' }}
+        >
+          プライバシーポリシー
+        </a>
+      </footer>
     </div>
   </>
 );

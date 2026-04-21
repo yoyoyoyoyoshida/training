@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プライバシーポリシー - GACHI-CUBE Training</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --accent-green: #32CD32;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 3rem;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            color: var(--accent-green);
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent-green);
+            padding-left: 1rem;
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        ul {
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .close-btn {
+            display: block;
+            width: fit-content;
+            margin: 3rem auto 0;
+            padding: 1rem 3rem;
+            background: var(--accent-green);
+            color: #000;
+            border: none;
+            border-radius: 50px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .close-btn:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+
+        .footer-note {
+            margin-top: 4rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="close-btn" style="margin: 0 0 2rem auto;" onclick="window.close()">閉じる</button>
+        <h1>プライバシーポリシー</h1>
+        
+        <p>GACHI-CUBE（以下「当サービス」）は、ユーザーの個人情報の保護を重要視し、以下の通りプライバシーポリシーを定めます。</p>
+
+        <h2>1. 取得する情報と利用目的</h2>
+        <p>当サービスでは、サービスの提供・改善および広告配信のために以下の情報を取得する場合があります。</p>
+        <ul>
+            <li><strong>認証情報:</strong> Googleアカウント等を利用したログイン時に、ユーザー識別子（UID）および表示名、プロフィール画像URLを取得します。これらはユーザーのスコア管理およびランキング表示のために利用されます。</li>
+            <li><strong>利用データ:</strong> パズルの解法手順、タイム、手数、操作ログ等を、統計的な分析およびランキング表示のために取得します。</li>
+            <li><strong>技術情報:</strong> 端末の種類、OS、ブラウザの種類、IPアドレス等を、サービスの安定運用および不正防止のために取得する場合があります。</li>
+        </ul>
+
+        <h2>2. 第三者による情報収集</h2>
+        <p>当サービスでは、以下の第三者サービスを利用しており、各サービスがユーザーの情報を自動的に取得する場合があります。詳細は各サービスのプライバシーポリシーをご確認ください。</p>
+        
+        <h3>Firebase（Google LLC）</h3>
+        <p>データの保存、ユーザー認証、利用状況の分析のためにGoogle Firebaseを利用しています。FirebaseはCookie等の技術を使用してデータを収集する場合があります。</p>
+        <p><a href="https://policies.google.com/privacy" style="color: var(--accent-green);">Google プライバシーポリシー</a></p>
+
+        <h3>広告配信サービスについて</h3>
+        <p>当サービスでは、第三者配信の広告サービス（Google AdMob、忍者アドマックス、i-mobile等）を利用し、ユーザーの興味に応じた広告を表示するためにCookieや端末識別子を利用する場合があります。これにより、ユーザーのブラウザや端末を識別する場合がありますが、個人を特定するものではありません。</p>
+        <p>各サービスのプライバシーポリシーおよび広告配信の停止（オプトアウト）については、以下のリンクをご確認ください。</p>
+        <ul>
+            <li><a href="https://policies.google.com/technologies/ads" style="color: var(--accent-green);">Google AdMob（Google LLC）</a></li>
+            <li><a href="https://corp.ninja.co.jp/privacy/" style="color: var(--accent-green);">忍者アドマックス（忍者ツールズ株式会社）</a></li>
+            <li><a href="https://www.i-mobile.co.jp/privacy.html" style="color: var(--accent-green);">i-mobile（株式会社アイモバイル）</a></li>
+        </ul>
+
+        <h2>3. 情報の管理と提供</h2>
+        <p>当サービスは、法令に基づく場合を除き、取得した情報をユーザーの同意なく第三者に提供することはありません。また、情報の漏洩、滅失の防止に努め、安全に管理いたします。</p>
+
+        <h2>4. 同意</h2>
+        <p>当サービスを利用することにより、ユーザーは本プライバシーポリシーに同意したものとみなされます。</p>
+
+        <button class="close-btn" onclick="window.close()">このページを閉じる</button>
+
+        <div class="footer-note">
+            &copy; 2026 GACHI-CUBE
+        </div>
+    </div>
+</body>
+</html>
