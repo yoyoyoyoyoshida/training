@@ -253,7 +253,10 @@ function App() {
               <div style={{ fontSize: '1.8rem', fontWeight: 800, fontFamily: 'monospace', color: '#fff', lineHeight: 1 }}>{formatTime(timeMs)}<span style={{fontSize:'1rem'}}>s</span></div>
             </div>
             <div>
-              <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.05em' }}>MOVES</div>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.05em', display: 'flex', justifyContent: 'space-between' }}>
+                <span>MOVES</span>
+                <span style={{ fontSize: '0.6rem', fontWeight: 400 }}>(持ち替えを除く)</span>
+              </div>
               <div style={{ fontSize: '1.8rem', fontWeight: 800, fontFamily: 'monospace', color: '#fff', lineHeight: 1 }}>{moveCount}</div>
             </div>
           </div>
@@ -284,13 +287,10 @@ function App() {
           </button>
         </div>
 
-        <VirtualPad onInputMove={handleInputMove} disabled={status === 'SOLVED'} />
-        
         <RankingBoard 
           batchId={currentBatchId} 
           onWatchReplay={(moves, name) => {
             const daily = getDailyScramble();
-            // batchIdが一致する場合のみ再生可能（または過去のスクランブルを保存する仕組みが必要ですが、まずは現チャレンジ用）
             if (currentBatchId === daily.batchId) {
               handleWatchReplay(moves, name, daily.scramble);
             } else {
@@ -299,6 +299,8 @@ function App() {
           }} 
         />
       </div>
+
+      <VirtualPad onInputMove={handleInputMove} disabled={status === 'SOLVED'} />
 
       {replayData && (
         <div style={{

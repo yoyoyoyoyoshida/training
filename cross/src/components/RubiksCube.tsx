@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import * as THREE from 'three';
 import { Text } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
 import { CubieState } from '../utils/cubeState';
 
 const FACE_COLORS = [
@@ -21,6 +22,34 @@ interface CubieProps {
 
 function Cubie({ state }: CubieProps) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const initialPosVec = useRef(new THREE.Vector3(state.initialPos.x, state.initialPos.y, state.initialPos.z));
+  const tempVec = useRef(new THREE.Vector3());
+  const isInitialized = useRef(false);
+
+  // 滑らかなアニメーション処理
+  useFrame(() => {
+    if (!meshRef.current) return;
+    
+    // 初回のみ即座に配置
+    if (!isInitialized.current) {
+      meshRef.current.quaternion.copy(state.rotation);
+      isInitialized.current = true;
+    }
+
+    // 1. 回転を補間 (Slerp) - クォータニオンだけを滑らかに動かす
+    meshRef.current.quaternion.slerp(state.rotation, 0.2);
+    
+    // 2. 補間された回転を初期位置に適用して、現在の「正しい」位置を逆算する
+    // これにより、どんな回転でも常に正確な円軌道を通るようになります
+    tempVec.current.copy(initialPosVec.current);
+    tempVec.current.applyQuaternion(meshRef.current.quaternion);
+    
+    meshRef.current.position.set(
+      tempVec.current.x * SPACING,
+      tempVec.current.y * SPACING,
+      tempVec.current.z * SPACING
+    );
+  });
 
   // 内部面の色（グレー）
   const INTERNAL_COLOR = '#222222';
@@ -36,19 +65,15 @@ function Cubie({ state }: CubieProps) {
   ];
 
   return (
-    <mesh 
-      ref={meshRef}
-      position={[state.position.x * SPACING, state.position.y * SPACING, state.position.z * SPACING]}
-      quaternion={state.rotation.clone()}
-    >
+    <mesh ref={meshRef}>
       <boxGeometry args={[CUBE_SIZE, CUBE_SIZE, CUBE_SIZE]} />
       {pieceColors.map((color, index) => (
         <meshStandardMaterial 
           key={index} 
           attach={`material-${index}`} 
           color={color} 
-          roughness={0.4} // 反射を抑えて色が白飛びしないように
-          metalness={0.0} // 非金属感を出して色の純度を上げる
+          roughness={0.4} 
+          metalness={0.0} 
         />
       ))}
       <lineSegments>
