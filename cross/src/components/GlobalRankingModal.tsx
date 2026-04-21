@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { collection, query, where, getDocs, orderBy, limit, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { getDailyScramble } from '../utils/scrambleGenerator';
 
 interface GlobalRankingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onWatchReplay?: (moves: string[], name: string, scramble: string) => void;
+  onWatchReplay?: (moves: string[], name: string, scramble: string[]) => void;
 }
 
 interface ScoreEntry {
@@ -15,7 +15,7 @@ interface ScoreEntry {
   moveCount: number;
   timeTaken: number;
   moveLog?: string[];
-  scramble?: string;
+  scramble?: string[];
 }
 
 interface UserStat {
@@ -78,7 +78,6 @@ export function GlobalRankingModal({ isOpen, onClose, onWatchReplay }: GlobalRan
       
       snap.forEach(doc => {
         const d = doc.data();
-        // batchIdがFREE_PRACTICEで始まるもののみカウント
         if (d.batchId && String(d.batchId).startsWith('FREE_PRACTICE_')) {
           const uid = d.userId;
           const current = userMap.get(uid) || { name: d.userName, count: 0 };
@@ -141,7 +140,7 @@ export function GlobalRankingModal({ isOpen, onClose, onWatchReplay }: GlobalRan
               color: tab === 'DAILY' ? '#000' : '#fff', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s'
             }}
           >
-            今日の1問 (最少手数)
+            今日の1問
           </button>
           <button 
             onClick={() => setTab('MONTHLY')}
@@ -163,30 +162,34 @@ export function GlobalRankingModal({ isOpen, onClose, onWatchReplay }: GlobalRan
               <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>まだ記録がありません</div>
             ) : (
               dailyScores.map((s, i) => (
-                <div key={s.id} style={{ display: 'flex', alignItems: 'center', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginBottom: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div key={s.id} style={{ display: 'flex', alignItems: 'center', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginBottom: '0.5rem', border: '1px solid rgba(255,255,255,0.05)', gap: '10px' }}>
                   <div style={{ width: '30px', fontWeight: 800, color: i < 3 ? 'var(--accent-green)' : 'var(--text-secondary)' }}>#{i+1}</div>
                   <div style={{ flex: 1, fontWeight: 700 }}>{s.userName}</div>
                   <div style={{ textAlign: 'right', fontFamily: 'monospace' }}>
                     <div style={{ color: 'var(--accent-green)', fontWeight: 800 }}>{s.moveCount}手</div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{(s.timeTaken/1000).toFixed(2)}s</div>
                   </div>
+                  {s.moveLog && s.scramble && onWatchReplay && (
+                    <button 
+                      onClick={() => onWatchReplay!(s.moveLog!, s.userName, s.scramble!)}
+                      style={{ background: 'var(--accent-green)', color: '#000', border: 'none', borderRadius: '6px', padding: '4px 8px', fontSize: '0.6rem', cursor: 'pointer', fontWeight: 800 }}
+                    >
+                      再生
+                    </button>
+                  )}
                 </div>
               ))
             )
           ) : (
-            monthlyStats.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>今月の記録はまだありません</div>
-            ) : (
-              monthlyStats.map((s, i) => (
-                <div key={s.userId} style={{ display: 'flex', alignItems: 'center', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginBottom: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ width: '30px', fontWeight: 800, color: i < 3 ? 'var(--accent-green)' : 'var(--text-secondary)' }}>#{i+1}</div>
-                  <div style={{ flex: 1, fontWeight: 700 }}>{s.userName}</div>
-                  <div style={{ textAlign: 'right', fontWeight: 800, color: 'var(--accent-green)' }}>
-                    {s.count} <span style={{ fontSize: '0.7rem' }}>回答</span>
-                  </div>
+            monthlyStats.map((s, i) => (
+              <div key={s.userId} style={{ display: 'flex', alignItems: 'center', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginBottom: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ width: '30px', fontWeight: 800, color: i < 3 ? 'var(--accent-green)' : 'var(--text-secondary)' }}>#{i+1}</div>
+                <div style={{ flex: 1, fontWeight: 700 }}>{s.userName}</div>
+                <div style={{ textAlign: 'right', fontWeight: 800, color: 'var(--accent-green)' }}>
+                  {s.count} <span style={{ fontSize: '0.7rem' }}>回答</span>
                 </div>
-              ))
-            )
+              </div>
+            ))
           )}
         </div>
       </div>

@@ -33,6 +33,7 @@ function App() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isGlobalRankingOpen, setIsGlobalRankingOpen] = useState(false);
   const [replayData, setReplayData] = useState<{ moves: Move[], userName: string } | null>(null);
+  const [currentScramble, setCurrentScramble] = useState<string[]>([]);
   const [hasCompletedDaily, setHasCompletedDaily] = useState(false); // 追加：今日の課題をクリアしたか
   const timerRef = useRef<number | null>(null);
   const replayRef = useRef<boolean>(false);
@@ -98,7 +99,8 @@ function App() {
         userName: displayName,
         moveCount: moveCount,
         timeTaken: timeMs,
-        moveLog: moveLog, // 追加：手順を保存
+        moveLog: moveLog,
+        scramble: currentScramble, // スクランブルも保存
         batchId: currentBatchId,
         createdAt: serverTimestamp(),
       });
@@ -199,12 +201,14 @@ function App() {
   };
 
   const handleRandomScramble = () => {
-    const basicMoves = ['R', "R'", 'L', "L'", 'U', "U'", 'D', "D'", 'F', "F'", 'B', "B'"];
-    const scramble = Array.from({ length: 15 }, () => basicMoves[Math.floor(Math.random() * basicMoves.length)]);
-    
     resetGameStates();
     const initialState = performMove(createInitialState(), 'x2');
+    const scramble = Array.from({ length: 20 }, () => {
+      const moves = ['R', "R'", 'R2', 'L', "L'", 'L2', 'U', "U'", 'U2', 'D', "D'", 'D2', 'F', "F'", 'F2', 'B', "B'", 'B2'];
+      return moves[Math.floor(Math.random() * moves.length)];
+    });
     setCubies(performMoves(initialState, scramble));
+    setCurrentScramble(scramble);
     setStatus('IDLE');
     setCurrentBatchId('FREE_PRACTICE_' + Date.now()); 
   };
@@ -214,6 +218,7 @@ function App() {
     resetGameStates();
     const initialState = performMove(createInitialState(), 'x2');
     setCubies(performMoves(initialState, daily.scramble));
+    setCurrentScramble(daily.scramble);
     setStatus('IDLE');
     setCurrentBatchId(daily.batchId);
   };
@@ -357,13 +362,8 @@ function App() {
 
         <RankingBoard 
           batchId={currentBatchId} 
-          onWatchReplay={(moves, name) => {
-            const daily = getDailyScramble();
-            if (currentBatchId === daily.batchId) {
-              handleWatchReplay(moves, name, daily.scramble);
-            } else {
-              alert("現在の課題以外のリプレイ再生は準備中です。");
-            }
+          onWatchReplay={(moves, name, scramble) => {
+            handleWatchReplay(moves, name, scramble);
           }} 
         />
 

@@ -8,6 +8,7 @@ interface Score {
   moveCount: number;
   timeTaken: number;
   moveLog?: string[];
+  scramble?: string[];
 }
 
 interface UserStat {
@@ -18,7 +19,7 @@ interface UserStat {
 
 interface RankingBoardProps {
   batchId: string;
-  onWatchReplay?: (moves: string[], name: string) => void;
+  onWatchReplay?: (moves: string[], name: string, scramble: string[]) => void;
 }
 
 export function RankingBoard({ batchId, onWatchReplay }: RankingBoardProps) {
@@ -102,9 +103,9 @@ export function RankingBoard({ batchId, onWatchReplay }: RankingBoardProps) {
               <span style={{ color: 'var(--accent-green)', marginRight: '8px' }}>{dailyTop.moveCount}手</span>
               <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem' }}>{formatTime(dailyTop.timeTaken)}s</span>
             </div>
-            {dailyTop.moveLog && onWatchReplay && (
+            {dailyTop.moveLog && dailyTop.scramble && onWatchReplay && (
               <button 
-                onClick={() => onWatchReplay(dailyTop.moveLog!, dailyTop.userName)}
+                onClick={() => onWatchReplay(dailyTop.moveLog!, dailyTop.userName, dailyTop.scramble!)}
                 style={{ background: 'var(--accent-green)', color: '#000', border: 'none', borderRadius: '4px', padding: '2px 6px', fontSize: '0.6rem', cursor: 'pointer', fontWeight: 800 }}
               >
                 ▶
