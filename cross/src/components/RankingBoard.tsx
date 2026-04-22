@@ -48,22 +48,21 @@ export function RankingBoard({ batchId, onWatchReplay }: RankingBoardProps) {
       setLoading(false);
     });
 
-    // 2. 今月の練習量 Top 3 を取得 (One-time)
-    const fetchMonthly = async () => {
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const qMonthly = query(
-        collection(db, 'scores'),
-        where('createdAt', '>=', Timestamp.fromDate(startOfMonth)),
-        orderBy('createdAt', 'desc')
-      );
-      const snap = await getDocs(qMonthly);
+    // 2. 今月の練習量 Top 3 を取得 (Real-time)
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const qMonthly = query(
+      collection(db, 'scores'),
+      where('createdAt', '>=', Timestamp.fromDate(startOfMonth))
+    );
+
+    const unsubscribeMonthly = onSnapshot(qMonthly, (snap) => {
       const userMap = new Map<string, { name: string, count: number }>();
       snap.forEach(doc => {
         const d = doc.data();
         if (d.batchId && String(d.batchId).startsWith('FREE_PRACTICE_')) {
-          const current = userMap.get(d.userId) || { name: d.userName, count: 0 };
-          userMap.set(d.userId, { name: d.userName, count: current.count + 1 });
+          const current = userMap.get(d.userId) || { name: d.userName || 'Guest', count: 0 };
+          userMap.set(d.userId, { name: current.name, count: current.count + 1 });
         }
       });
       const stats = Array.from(userMap.entries()).map(([uid, data]) => ({
@@ -73,11 +72,12 @@ export function RankingBoard({ batchId, onWatchReplay }: RankingBoardProps) {
       }));
       stats.sort((a, b) => b.count - a.count);
       setMonthlyTop(stats.slice(0, 3));
-    };
-    
-    fetchMonthly();
+    });
 
-    return () => unsubscribeDaily();
+    return () => {
+      unsubscribeDaily();
+      unsubscribeMonthly();
+    };
   }, [batchId]);
 
   const formatTime = (ms: number) => (ms / 1000).toFixed(2);
