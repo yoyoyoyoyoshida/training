@@ -5,9 +5,10 @@ interface ProfileModalProps {
   currentName: string;
   onClose: () => void;
   onSave: (newName: string) => void;
+  onLogout?: () => void;
 }
 
-export function ProfileModal({ isOpen, currentName, onClose, onSave }: ProfileModalProps) {
+export function ProfileModal({ isOpen, currentName, onClose, onSave, onLogout }: ProfileModalProps) {
   const [name, setName] = useState(currentName);
 
   useEffect(() => {
@@ -78,6 +79,26 @@ export function ProfileModal({ isOpen, currentName, onClose, onSave }: ProfileMo
             キャンセル
           </button>
         </div>
+        
+        {onLogout && (
+          <div style={{ marginTop: '2rem', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1.5rem' }}>
+            <button 
+              onClick={() => {
+                if (window.confirm("ログアウトしますか？")) {
+                  onLogout();
+                  onClose();
+                }
+              }}
+              style={{
+                background: 'rgba(255,0,0,0.1)', border: '1px solid rgba(255,0,0,0.3)',
+                color: '#ff4444', padding: '0.6rem 1.5rem', borderRadius: '8px',
+                fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s'
+              }}
+            >
+              ログアウト
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

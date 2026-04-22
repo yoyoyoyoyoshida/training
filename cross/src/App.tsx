@@ -172,6 +172,12 @@ function App() {
   };
 
   const handleResultSubmit = async (displayName: string) => {
+    // 全国大会（DAILY_）の場合のみ、ランキング用スコアとして送信する
+    if (!currentBatchId.startsWith('DAILY_')) {
+      setIsResultModalOpen(false);
+      return;
+    }
+
     try {
       const scoreData: any = {
         userId: user?.uid || 'guest_' + Date.now(),
@@ -188,19 +194,13 @@ function App() {
 
       if (user) {
         await updateProfileData(user.uid, displayName);
-        if (currentBatchId.startsWith('DAILY_')) {
-          setHasCompletedDaily(true);
-        }
+        setHasCompletedDaily(true);
       }
       
       setIsResultModalOpen(false);
     } catch (err) {
       console.error("Score save failed:", err);
-      if (!user) {
-        alert("ログインしていないため、ランキングに保存できません。全国大会に参加するにはログインしてください。");
-      } else {
-        alert("保存に失敗しました。Firestoreのルール設定（users等）が正しいか、Firebaseコンソールを確認してください。");
-      }
+      alert("保存に失敗しました。");
     }
   };
 
@@ -216,8 +216,12 @@ function App() {
       alert("リプレイを視聴するにはGoogleログインが必要です。");
       return;
     }
-    if (!hasCompletedDaily) {
-      alert("まずはご自身で「本日の1発勝負」をクリアして、スコアを登録してください！（ネタバレ防止のため）");
+    const daily = getDailyScramble();
+    // 「すでに挑戦権を消費している」かつ「現在1発勝負のプレイ画面ではない（＝諦めてリロードした等）」場合は視聴許可
+    const isFailedOrGivenUp = hasStartedDaily && currentBatchId !== daily.batchId;
+
+    if (!hasCompletedDaily && !isFailedOrGivenUp) {
+      alert("まずはご自身で「本日の1発勝負」に挑戦してください！（プレイ中のネタバレは防止されています）");
       return;
     }
 
@@ -259,16 +263,18 @@ function App() {
     // ゲーム開始の判定（モードが選択され、かつIDがある時のみタイマー開始）
     if (status === 'IDLE' && isPhysical && currentBatchId && currentBatchId !== '') {
       startTimer();
+      // 最初の1手も即座にカウント
+      setMoveCount(1);
+      setMoveLog([move]);
     }
 
     setCubies(prev => performMove(prev, move));
 
-    // プレイ中（PLAYING）かつ、何らかのモードが進行中（batchIdあり）の時のみ記録を更新
-    if (status === 'PLAYING' && isPhysical && currentBatchId && currentBatchId !== '') {
-      setMoveCount(prev => prev + 1);
-      setMoveLog(prev => [...prev, move]);
-    } else if (status === 'PLAYING' && currentBatchId && currentBatchId !== '') {
-      // 持ち替えなどは移動回数には含めないがログには残す
+    // すでにプレイ中（PLAYING）の場合のみ追加で記録を更新
+    if (status === 'PLAYING' && currentBatchId && currentBatchId !== '') {
+      if (isPhysical) {
+        setMoveCount(prev => prev + 1);
+      }
       setMoveLog(prev => [...prev, move]);
     }
   };
@@ -334,53 +340,37 @@ function App() {
     }
   };
 
-  const formatTime = (ms: number) => (ms / 1000).toFixed(2);
 
   return (
-    <>
-      <header className="app-header">
-        <div 
-          className="brand"
-          onMouseEnter={() => setIsLogoHover(true)}
-          onMouseLeave={() => setIsLogoHover(false)}
-          style={{ cursor: 'pointer' }}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
-            viewBox="0 0 24 24"
-            fill="none"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{
-              transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-              transform: isLogoHover ? 'rotate(240deg)' : 'rotate(0deg)',
-            }}
-          >
-            {/* Red Segment */}
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="#ff0000" strokeDasharray="12.16 48.64" strokeDashoffset="0" />
-            {/* Blue Segment */}
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="#0055ff" strokeDasharray="12.16 48.64" strokeDashoffset="-12.16" />
-            {/* Orange Segment */}
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="#ff8800" strokeDasharray="12.16 48.64" strokeDashoffset="-24.32" />
-            {/* Green Segment */}
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="#00bb00" strokeDasharray="12.16 48.64" strokeDashoffset="-36.48" />
-            {/* Yellow Segment */}
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="#ffe600" strokeDasharray="12.16 48.64" strokeDashoffset="-48.64" />
-            {/* Y Inner */}
-            <path d="M12 12.5V19M12 12.5L6 9M12 12.5L18 9" stroke="white" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-          Cross <span className="brand-accent">Practice</span>
+    <div className="app-container">
+      <header className="header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }} onMouseEnter={() => setIsLogoHover(true)} onMouseLeave={() => setIsLogoHover(false)}>
+          <img 
+            src="./logo.svg" 
+            alt="Logo" 
+            style={{ width: '32px', height: '32px', filter: isLogoHover ? 'drop-shadow(0 0 10px var(--accent-green))' : 'none', transition: 'all 0.3s' }} 
+          />
+          <h1 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 900, letterSpacing: '-0.02em', background: 'linear-gradient(90deg, #fff, #aaa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            CROSS PRACTICE
+          </h1>
         </div>
-        <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+        
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <a href="/training/" className="back-link" style={{ fontSize: '1.2rem', marginRight: '0.8rem', opacity: 0.7, color: '#fff', textDecoration: 'none', fontWeight: 900 }}>
+            ←
+          </a>
+
           <button 
-            className="ranking-trigger-btn" 
             onClick={() => setIsGlobalRankingOpen(true)}
-            title="ランキングを表示"
+            style={{ 
+              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', 
+              borderRadius: '8px', height: '32px', display: 'flex', 
+              alignItems: 'center', justifyContent: 'center', color: '#fff', 
+              cursor: 'pointer', marginRight: '0.5rem', padding: '0 8px', gap: '6px'
+            }}
+            title="ランキング"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
               <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
               <path d="M4 22h16"></path>
@@ -388,136 +378,109 @@ function App() {
               <path d="M12 22v-4"></path>
               <path d="M17 4H7a2 2 0 0 0-2 2v3a7 7 0 0 0 14 0V6a2 2 0 0 0-2-2Z"></path>
             </svg>
-            <span className="hide-on-mobile" style={{ marginLeft: '0.5rem' }}>ランキング</span>
+            <span className="hide-on-mobile" style={{ fontSize: '0.75rem', fontWeight: 800 }}>ランキング</span>
           </button>
+          
           {user ? (
             <div 
               onClick={() => setIsProfileModalOpen(true)}
-              style={{ 
-                display: 'flex', alignItems: 'center', gap: '0.8rem', 
-                cursor: 'pointer', padding: '4px 8px', borderRadius: '8px',
-                transition: 'background 0.2s'
-              }}
-              className="header-user-profile"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '50px', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.1)' }}
             >
-              <img src={user.photoURL || ''} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--accent-blue)' }} />
-              <div className="hide-on-mobile" style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#fff' }}>{profileName}</span>
-                <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>クリックで名前変更</span>
+              <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--accent-green)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.7rem' }}>
+                {profileName.charAt(0)}
               </div>
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (window.confirm("ログアウトしますか？")) logout();
-                }}
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  color: 'var(--text-secondary)',
-                  padding: '4px 8px',
-                  borderRadius: '6px',
-                  fontSize: '0.7rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,0,0,0.1)'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-              >
-                ログアウト
-              </button>
+              <div className="hide-on-mobile" style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '0.7rem', fontWeight: 800 }}>{profileName}</span>
+              </div>
             </div>
           ) : (
-            <button className="primary-btn" onClick={login} style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
-              Googleでログイン
+            <button className="primary-btn" onClick={login} style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem' }}>
+              ログイン
             </button>
           )}
-          <a href="/training/" className="back-link">
-            <span className="hide-on-mobile">← ポータルへ戻る</span>
-            <span className="show-only-mobile">← 戻る</span>
-          </a>
         </div>
       </header>
 
-      <div className="main-content">
-        <div className="scene-container">
-          <div className="stats-overlay">
-            <div className="stat-card">
-              <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 800 }}>TIME</span>
-              <span style={{ fontSize: '1.2rem', fontWeight: 800, fontFamily: 'monospace' }}>{formatTime(timeMs)}</span>
-            </div>
-            <div className="stat-card">
-              <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 800 }}>MOVES</span>
-              <span style={{ fontSize: '1.2rem', fontWeight: 800, fontFamily: 'monospace' }}>{moveCount}</span>
-            </div>
+      <main className="cube-container">
+        {/* 統計オーバーレイ */}
+        <div style={{ 
+          position: 'absolute', top: '1rem', left: '1rem', 
+          display: 'flex', gap: '0.8rem', zIndex: 50, pointerEvents: 'none' 
+        }}>
+          <div className="stat-card" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.6rem', fontWeight: 800 }}>TIME</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 800, fontFamily: 'monospace', color: 'var(--accent-green)', lineHeight: 1 }}>{(timeMs / 1000).toFixed(2)}s</div>
           </div>
-          <Canvas camera={{ position: [6, 6, 12], fov: 45 }}>
-            <color attach="background" args={['#050505']} />
-            <ambientLight intensity={0.8} />
-            <directionalLight position={[5, 10, 7]} intensity={0.5} />
-            <RubiksCube cubies={cubies} />
-            <OrbitControls enablePan={false} />
-          </Canvas>
+          <div className="stat-card" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.6rem', fontWeight: 800 }}>MOVES</div>
+            <div style={{ fontSize: '1.2rem', fontWeight: 800, fontFamily: 'monospace', color: '#fff', lineHeight: 1 }}>{moveCount}</div>
+          </div>
         </div>
 
-        <div className="controls-panel">
-          {/* PC用統計パネル (モバイルではCSSで非表示) */}
-          <div className="hide-on-mobile" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', background: 'var(--card-bg)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
-            <div>
-              <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.05em' }}>TIME</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, fontFamily: 'monospace', color: '#fff', lineHeight: 1 }}>{formatTime(timeMs)}<span style={{fontSize:'1rem'}}>s</span></div>
-            </div>
-            <div>
-              <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.05em', display: 'flex', justifyContent: 'space-between' }}>
-                <span>MOVES</span>
-                <span style={{ fontSize: '0.6rem', fontWeight: 400 }}>(持ち替えを除く)</span>
-              </div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 800, fontFamily: 'monospace', color: '#fff', lineHeight: 1 }}>{moveCount}</div>
-            </div>
-          </div>
+        <Canvas camera={{ position: [5, 5, 5], fov: 45 }}>
+          <ambientLight intensity={0.5} />
+          <pointLight position={[10, 10, 10]} intensity={1} />
+          <RubiksCube cubies={cubies} />
+          <OrbitControls enablePan={false} enableZoom={false} />
+        </Canvas>
+        
+      </main>
 
-          <div className="control-group">
-            <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem' }}>
-              <span>Status</span>
-              {status === 'SOLVED' && <span style={{ color: '#32cd32' }}>✓ CLEAR!</span>}
-              {status === 'PLAYING' && <span style={{ color: 'var(--accent-blue)' }}>● PLAYING</span>}
-              {status === 'IDLE' && <span style={{ color: 'var(--text-secondary)' }}>- IDLE</span>}
-            </label>
-          </div>
+      <section className="controls-section">
 
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', minHeight: '60px', alignItems: 'center', justifyContent: 'center' }}>
-          {(status === 'PLAYING' && currentBatchId.startsWith('DAILY_')) ? (
+        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', minHeight: '40px', alignItems: 'center', justifyContent: 'center' }}>
+          {status === 'PLAYING' ? (
             <div style={{ 
-              width: '100%', padding: '1rem', background: 'rgba(255,20,147,0.1)', 
-              border: '2px solid #ff1493', borderRadius: '12px', color: '#ff1493',
-              textAlign: 'center', fontWeight: 900, fontSize: '1.2rem',
-              boxShadow: '0 0 20px rgba(255,20,147,0.2)',
+              width: '100%', padding: '0.6rem', 
+              background: currentBatchId.startsWith('DAILY_') ? 'rgba(255,20,147,0.1)' : 'rgba(0,122,255,0.1)', 
+              border: `2px solid ${currentBatchId.startsWith('DAILY_') ? '#ff1493' : 'var(--accent-blue)'}`, 
+              borderRadius: '10px', 
+              color: currentBatchId.startsWith('DAILY_') ? '#ff1493' : 'var(--accent-blue)',
+              textAlign: 'center', fontWeight: 900, fontSize: '1rem',
               animation: 'pulse 2s infinite'
             }}>
-              🔥 真剣勝負中！
+              {currentBatchId.startsWith('DAILY_') ? '🔥 真剣勝負中！' : '💪 トレーニング中！'}
             </div>
           ) : (
             <>
               <button 
                 className="primary-btn" 
-                onClick={handleDailyScrambleClick}
-                disabled={hasCompletedDaily || hasStartedDaily}
+                onClick={() => {
+                  if (hasCompletedDaily || hasStartedDaily) {
+                    alert("本日の全国大会（1発勝負）はすでに挑戦済みです。また明日挑戦してください！");
+                  } else {
+                    handleDailyScrambleClick();
+                  }
+                }}
                 style={{ 
-                  flex: '1.5 0 200px', 
-                  background: (hasCompletedDaily || hasStartedDaily) ? '#222' : 'var(--accent-green)', 
-                  color: (hasCompletedDaily || hasStartedDaily) ? 'var(--text-secondary)' : '#000' 
+                  flex: '1.5 0 140px', 
+                  background: 'var(--accent-green)', 
+                  color: '#000',
+                  padding: '0.6rem', fontSize: '0.8rem',
+                  position: 'relative',
+                  opacity: (hasCompletedDaily || hasStartedDaily) ? 0.7 : 1
                 }}
               >
-                {(hasCompletedDaily || hasStartedDaily) ? (
-                  <>明日も挑戦してね！</>
-                ) : (
-                  <>本日の1発勝負<br /><span style={{ fontSize: '0.8rem', opacity: 0.8 }}>(全国大会)</span></>
+                本日の1発勝負 <span style={{ fontSize: '0.6rem', opacity: 0.8 }}>(全国大会)</span>
+                {(hasCompletedDaily || hasStartedDaily) && (
+                  <span style={{ 
+                    position: 'absolute', top: '-5px', right: '-5px', 
+                    background: '#000', color: 'var(--accent-green)', 
+                    fontSize: '0.6rem', padding: '2px 6px', borderRadius: '4px',
+                    border: '1px solid var(--accent-green)', fontWeight: 900
+                  }}>挑戦済</span>
                 )}
               </button>
               <button 
                 className="primary-btn" 
                 onClick={handleRandomScramble}
-                style={{ flex: '1 0 150px', background: '#333', fontSize: '0.9rem' }}
+                style={{ 
+                  flex: '1 0 100px', 
+                  background: 'var(--accent-blue)', 
+                  color: '#fff',
+                  padding: '0.6rem', fontSize: '0.8rem',
+                  boxShadow: '0 4px 15px rgba(0, 122, 255, 0.3)'
+                }}
               >
                 トレーニング
               </button>
@@ -527,9 +490,9 @@ function App() {
 
         <VirtualPad onInputMove={handleInputMove} disabled={!!replayData} />
 
-        <div className="hide-on-mobile">
+        <div className="hide-on-mobile" style={{ marginTop: '2rem' }}>
           <RankingBoard 
-            batchId={currentBatchId || getDailyScramble().batchId} 
+            batchId={getDailyScramble().batchId} 
             onWatchReplay={(moves, name, scramble) => {
               handleWatchReplay(moves, name, scramble);
             }} 
@@ -544,22 +507,15 @@ function App() {
           color: 'var(--text-secondary)',
           borderTop: '1px solid rgba(255,255,255,0.05)'
         }}>
-          <div style={{ marginBottom: '0.4rem' }}>&copy; 2026 GACHI-CUBE Training</div>
-          <a 
-            href="/training/privacy.html" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            style={{ color: 'var(--text-secondary)', textDecoration: 'underline' }}
-          >
-            プライバシーポリシー
-          </a>
+          &copy; 2026 GACHI-CUBE Training | <a href="/training/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)' }}>Privacy</a>
         </footer>
-      </div>
+      </section>
 
+      {/* Modals & Overlays */}
       {replayData && (
         <div style={{
-          position: 'fixed', top: '100px', left: '50%', transform: 'translateX(-50%)',
-          background: 'rgba(0,122,255,0.9)', color: '#fff', padding: '1rem 2rem',
+          position: 'fixed', top: '80px', left: '50%', transform: 'translateX(-50%)',
+          background: 'rgba(0,122,255,0.9)', color: '#fff', padding: '0.8rem 1.5rem',
           borderRadius: '50px', fontWeight: 800, zIndex: 1000, display: 'flex', gap: '1rem',
           alignItems: 'center', boxShadow: '0 10px 30px rgba(0,122,255,0.4)',
           border: '2px solid #fff'
@@ -567,11 +523,8 @@ function App() {
           <span className="pulse">● REPLAYING</span>
           <span>{replayData.userName}'s Solve</span>
           <button 
-            onClick={() => {
-              setReplayData(null);
-              replayRef.current = false;
-            }}
-            style={{ background: '#fff', color: 'var(--accent-blue)', border: 'none', borderRadius: '20px', padding: '2px 10px', fontSize: '0.7rem', fontWeight: 900, cursor: 'pointer' }}
+            onClick={() => { setReplayData(null); replayRef.current = false; }}
+            style={{ background: '#fff', color: 'var(--accent-blue)', border: 'none', borderRadius: '20px', padding: '2px 10px', fontSize: '0.6rem', fontWeight: 900, cursor: 'pointer' }}
           >
             STOP
           </button>
@@ -595,17 +548,14 @@ function App() {
         currentName={profileName}
         onClose={() => setIsProfileModalOpen(false)}
         onSave={handleProfileSave}
+        onLogout={logout}
       />
-
-
-
       <DailyChallengeModal 
         isOpen={isDailyConfirmOpen}
         onClose={() => setIsDailyConfirmOpen(false)}
         onConfirm={confirmDailyChallenge}
         isLoading={isDailyLoading}
       />
-
       <GlobalRankingModal 
         isOpen={isGlobalRankingOpen}
         onClose={() => setIsGlobalRankingOpen(false)}
@@ -615,8 +565,7 @@ function App() {
         }}
       />
     </div>
-  </>
-);
+  );
 }
 
 export default App;
