@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment } from '@react-three/drei';
+import { OrbitControls } from '@react-three/drei';
 
 import { RubiksCube } from './components/RubiksCube';
-import { createInitialState, parseMoveString, performMoves, performMove, Move } from './utils/cubeState';
+import { createInitialState, performMoves, performMove, Move } from './utils/cubeState';
 import { checkCrossSolved } from './utils/crossValidator';
 import { VirtualPad } from './components/VirtualPad';
 import { RankingBoard } from './components/RankingBoard';
@@ -12,16 +12,21 @@ import { ProfileModal } from './components/ProfileModal';
 import { useAuth } from './hooks/useAuth';
 import { useProfile } from './hooks/useProfile';
 import { getDailyScramble } from './utils/scrambleGenerator';
-import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, Timestamp, orderBy } from 'firebase/firestore';
 import { db } from './lib/firebase';
 import { GlobalRankingModal } from './components/GlobalRankingModal';
+import { DailyChallengeModal } from './components/DailyChallengeModal';
 
 type GameStatus = 'IDLE' | 'PLAYING' | 'SOLVED';
 
 function App() {
-  const { user, login } = useAuth();
+  const { user, login, logout } = useAuth();
   const { profileName, updateProfileData, isNewUser } = useProfile(user);
   const [isLogoHover, setIsLogoHover] = useState(false);
+  const [trainingStats, setTrainingStats] = useState<{ totalSessions: number, rank: number, totalUsers: number } | null>(null);
+  const [hasStartedDaily, setHasStartedDaily] = useState(false);
+  const [isDailyConfirmOpen, setIsDailyConfirmOpen] = useState(false);
+  const [isDailyLoading, setIsDailyLoading] = useState(false);
   
   const [cubies, setCubies] = useState(() => performMove(createInitialState(), 'x2'));
   const [status, setStatus] = useState<GameStatus>('IDLE');
@@ -34,34 +39,45 @@ function App() {
   const [isGlobalRankingOpen, setIsGlobalRankingOpen] = useState(false);
   const [replayData, setReplayData] = useState<{ moves: Move[], userName: string } | null>(null);
   const [currentScramble, setCurrentScramble] = useState<string[]>([]);
-  const [hasCompletedDaily, setHasCompletedDaily] = useState(false); // 追加：今日の課題をクリアしたか
+  const [hasCompletedDaily, setHasCompletedDaily] = useState(false); 
   const timerRef = useRef<number | null>(null);
   const replayRef = useRef<boolean>(false);
 
-  // 初回ログイン時に名前設定モーダルを強制表示
   useEffect(() => {
     if (isNewUser) {
       setIsProfileModalOpen(true);
     }
   }, [isNewUser]);
 
-  // 今日の課題をクリア済みかチェックする
   useEffect(() => {
-    if (user && currentBatchId.startsWith('DAILY_')) {
-      const checkCompletion = async () => {
-        const q = query(
-          collection(db, 'scores'),
-          where('userId', '==', user.uid),
-          where('batchId', '==', currentBatchId)
-        );
-        const snap = await getDocs(q);
-        setHasCompletedDaily(!snap.empty);
-      };
-      checkCompletion();
-    } else {
-      setHasCompletedDaily(false);
-    }
-  }, [user, currentBatchId]);
+    const checkDailyStatus = async () => {
+      if (!user) return;
+      
+      const daily = getDailyScramble();
+      const q = query(
+        collection(db, 'dailyChallenges'),
+        where('userId', '==', user.uid),
+        where('date', '==', daily.batchId)
+      );
+      
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        setHasStartedDaily(true);
+      }
+
+      const qScore = query(
+        collection(db, 'scores'),
+        where('userId', '==', user.uid),
+        where('batchId', '==', daily.batchId)
+      );
+      const snapScore = await getDocs(qScore);
+      if (!snapScore.empty) {
+        setHasCompletedDaily(true);
+      }
+    };
+
+    checkDailyStatus();
+  }, [user]);
 
   const startTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -79,35 +95,99 @@ function App() {
     }
   };
 
-  // Check solve status securely when state updates
+  const startNewGame = () => {
+    stopTimer();
+    setMoveCount(0);
+    setTimeMs(0);
+    setMoveLog([]);
+    setReplayData(null);
+    setStatus('IDLE');
+  };
+
   useEffect(() => {
     if (status === 'PLAYING') {
       const isSolved = checkCrossSolved(cubies, 'WHITE') || checkCrossSolved(cubies, 'YELLOW');
       if (isSolved) {
         setStatus('SOLVED');
         stopTimer();
-        setTimeout(() => setIsResultModalOpen(true), 500); // 完了の余韻のために少し遅らせる
+        
+        if (currentBatchId.startsWith('FREE_PRACTICE_')) {
+          if (user) {
+            handleAutoSaveTraining();
+          } else {
+            setTrainingStats(null);
+          }
+        }
+        
+        setTimeout(() => setIsResultModalOpen(true), 500);
       }
     }
-  }, [cubies, status]);
+  }, [cubies, status, user, currentBatchId]);
 
-  const handleResultSubmit = async (displayName: string) => {
-    // スコア保存
+  const handleAutoSaveTraining = async () => {
     try {
       await addDoc(collection(db, 'scores'), {
-        userId: user?.uid || 'guest_' + Date.now(),
-        userName: displayName,
+        userId: user!.uid,
+        userName: profileName || 'GUEST',
         moveCount: moveCount,
         timeTaken: timeMs,
         moveLog: moveLog,
-        scramble: currentScramble, // スクランブルも保存
+        scramble: currentScramble,
         batchId: currentBatchId,
         createdAt: serverTimestamp(),
       });
 
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const q = query(
+        collection(db, 'scores'),
+        where('createdAt', '>=', Timestamp.fromDate(startOfMonth)),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const snap = await getDocs(q);
+      const userCounts: Record<string, number> = {};
+      
+      snap.docs.forEach(doc => {
+        const data = doc.data();
+        if (data.batchId && String(data.batchId).startsWith('FREE_PRACTICE_')) {
+          userCounts[data.userId] = (userCounts[data.userId] || 0) + 1;
+        }
+      });
+
+      const sortedUsers = Object.entries(userCounts).sort((a, b) => b[1] - a[1]);
+      const myRank = sortedUsers.findIndex(([uid]) => uid === user!.uid) + 1;
+      
+      setTrainingStats({
+        totalSessions: userCounts[user!.uid] || 1,
+        rank: myRank || 1,
+        totalUsers: sortedUsers.length
+      });
+
+    } catch (err) {
+      console.error("Auto save failed:", err);
+    }
+  };
+
+  const handleResultSubmit = async (displayName: string) => {
+    try {
+      const scoreData: any = {
+        userId: user?.uid || 'guest_' + Date.now(),
+        userName: displayName || 'ゲスト',
+        moveCount: moveCount,
+        timeTaken: timeMs,
+        moveLog: moveLog,
+        scramble: currentScramble,
+        batchId: currentBatchId,
+        createdAt: serverTimestamp(),
+      };
+
+      await addDoc(collection(db, 'scores'), scoreData);
+
       if (user) {
         await updateProfileData(user.uid, displayName);
-        // 今日の課題ならクリアフラグを立てる
         if (currentBatchId.startsWith('DAILY_')) {
           setHasCompletedDaily(true);
         }
@@ -116,7 +196,11 @@ function App() {
       setIsResultModalOpen(false);
     } catch (err) {
       console.error("Score save failed:", err);
-      alert("保存に失敗しました。ルール設定等を確認してください。");
+      if (!user) {
+        alert("ログインしていないため、ランキングに保存できません。全国大会に参加するにはログインしてください。");
+      } else {
+        alert("保存に失敗しました。Firestoreのルール設定（users等）が正しいか、Firebaseコンソールを確認してください。");
+      }
     }
   };
 
@@ -128,7 +212,6 @@ function App() {
   };
 
   const handleWatchReplay = async (moves: string[], solveName: string, scramble: string[]) => {
-    // 権限制限チェック
     if (!user) {
       alert("リプレイを視聴するにはGoogleログインが必要です。");
       return;
@@ -138,7 +221,6 @@ function App() {
       return;
     }
 
-    // リプレイ開始：まず問題を再現
     stopTimer();
     replayRef.current = true;
     const initialState = performMove(createInitialState(), 'x2');
@@ -148,24 +230,20 @@ function App() {
     setTimeMs(0);
     setReplayData({ moves, userName: solveName });
 
-    // 1手ずつ再生
     let currentCube = performMoves(initialState, scramble);
     for (let i = 0; i < moves.length; i++) {
-      // 途中で停止ボタンが押された（replayRefがfalseになった）ら中断
       if (!replayRef.current) break; 
       
-      await new Promise(r => setTimeout(r, 800)); // 再生速度を少し調整
+      await new Promise(r => setTimeout(r, 800));
       
-      // 再度チェック
       if (!replayRef.current) break;
 
       const m = moves[i];
       currentCube = performMove(currentCube, m);
-      setCubies([...currentCube]); // 正しい配列展開記法に修正
+      setCubies([...currentCube]);
       setMoveCount(i + 1);
     }
     
-    // 終了後に少し待ってリプレイモードをクリア
     setTimeout(() => {
       setReplayData(null);
       replayRef.current = false;
@@ -173,9 +251,8 @@ function App() {
   };
 
   const handleInputMove = (move: Move) => {
-    if (status === 'SOLVED' || replayData) return; // リプレイ中はガード
+    if (status === 'SOLVED' || replayData) return;
 
-    // x, y, z などの全体持ち替え以外は全て物理手（1手）としてカウント
     const mCore = move.replace(/['2\sw]/gi, '').toLowerCase();
     const isPhysical = !['x', 'y', 'z'].includes(mCore) && mCore.length > 0;
 
@@ -186,9 +263,9 @@ function App() {
     setCubies(prev => performMove(prev, move));
     if (isPhysical) {
       setMoveCount(prev => prev + 1);
-      setMoveLog(prev => [...prev, move]); // ログに追加
+      setMoveLog(prev => [...prev, move]);
     } else {
-      setMoveLog(prev => [...prev, move]); // 持ち替えもリプレイ再現のために保存
+      setMoveLog(prev => [...prev, move]);
     }
   };
 
@@ -213,14 +290,44 @@ function App() {
     setCurrentBatchId('FREE_PRACTICE_' + Date.now()); 
   };
 
-  const handleDailyScramble = () => {
-    const daily = getDailyScramble();
-    resetGameStates();
-    const initialState = performMove(createInitialState(), 'x2');
-    setCubies(performMoves(initialState, daily.scramble));
-    setCurrentScramble(daily.scramble);
-    setStatus('IDLE');
-    setCurrentBatchId(daily.batchId);
+  const handleDailyScrambleClick = () => {
+    if (!user) {
+      if (window.confirm("「全国大会」に参加するにはGoogleログインが必要です。ログイン画面を表示しますか？")) {
+        login();
+      }
+      return;
+    }
+    if (hasCompletedDaily || hasStartedDaily) return;
+    setIsDailyConfirmOpen(true);
+  };
+
+  const confirmDailyChallenge = async () => {
+    if (!user) return;
+    setIsDailyLoading(true);
+    
+    try {
+      const daily = getDailyScramble();
+      
+      await addDoc(collection(db, 'dailyChallenges'), {
+        userId: user.uid,
+        date: daily.batchId,
+        createdAt: serverTimestamp()
+      });
+
+      setHasStartedDaily(true);
+      setIsDailyConfirmOpen(false);
+
+      const dailyScramble = getDailyScramble();
+      setCurrentScramble(dailyScramble.scramble);
+      setCubies(performMoves(performMove(createInitialState(), 'x2'), dailyScramble.scramble));
+      setCurrentBatchId(dailyScramble.batchId);
+      startNewGame();
+    } catch (err) {
+      console.error("Challenge start failed:", err);
+      alert("通信に失敗しました。もう一度お試しください。");
+    } finally {
+      setIsDailyLoading(false);
+    }
   };
 
   const formatTime = (ms: number) => (ms / 1000).toFixed(2);
@@ -294,6 +401,27 @@ function App() {
                 <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#fff' }}>{profileName}</span>
                 <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>クリックで名前変更</span>
               </div>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (window.confirm("ログアウトしますか？")) logout();
+                }}
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: 'var(--text-secondary)',
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,0,0,0.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+              >
+                ログアウト
+              </button>
             </div>
           ) : (
             <button className="primary-btn" onClick={login} style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
@@ -353,21 +481,44 @@ function App() {
             </label>
           </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <button 
-            className="primary-btn" 
-            onClick={handleDailyScramble}
-            style={{ flex: '1.5 0 200px', background: 'var(--accent-green)', color: '#000' }}
-          >
-            本日の1発勝負<br /><span style={{ fontSize: '0.8rem', opacity: 0.8 }}>(全国共通)</span>
-          </button>
-          <button 
-            className="primary-btn" 
-            onClick={handleRandomScramble}
-            style={{ flex: '1 0 150px', background: '#333', fontSize: '0.9rem' }}
-          >
-            トレーニング
-          </button>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', minHeight: '60px', alignItems: 'center', justifyContent: 'center' }}>
+          {(status === 'PLAYING' && currentBatchId.startsWith('DAILY_')) ? (
+            <div style={{ 
+              width: '100%', padding: '1rem', background: 'rgba(255,20,147,0.1)', 
+              border: '2px solid #ff1493', borderRadius: '12px', color: '#ff1493',
+              textAlign: 'center', fontWeight: 900, fontSize: '1.2rem',
+              boxShadow: '0 0 20px rgba(255,20,147,0.2)',
+              animation: 'pulse 2s infinite'
+            }}>
+              🔥 真剣勝負中！
+            </div>
+          ) : (
+            <>
+              <button 
+                className="primary-btn" 
+                onClick={handleDailyScrambleClick}
+                disabled={hasCompletedDaily || hasStartedDaily}
+                style={{ 
+                  flex: '1.5 0 200px', 
+                  background: (hasCompletedDaily || hasStartedDaily) ? '#222' : 'var(--accent-green)', 
+                  color: (hasCompletedDaily || hasStartedDaily) ? 'var(--text-secondary)' : '#000' 
+                }}
+              >
+                {(hasCompletedDaily || hasStartedDaily) ? (
+                  <>明日も挑戦してね！</>
+                ) : (
+                  <>本日の1発勝負<br /><span style={{ fontSize: '0.8rem', opacity: 0.8 }}>(全国大会)</span></>
+                )}
+              </button>
+              <button 
+                className="primary-btn" 
+                onClick={handleRandomScramble}
+                style={{ flex: '1 0 150px', background: '#333', fontSize: '0.9rem' }}
+              >
+                トレーニング
+              </button>
+            </>
+          )}
         </div>
 
         <VirtualPad onInputMove={handleInputMove} disabled={status === 'SOLVED' || !!replayData} />
@@ -431,6 +582,9 @@ function App() {
         initialName={profileName}
         onClose={() => setIsResultModalOpen(false)}
         onSubmit={handleResultSubmit}
+        isTrainingMode={currentBatchId.startsWith('FREE_PRACTICE_')}
+        trainingStats={trainingStats}
+        onLogin={login}
       />
       <ProfileModal 
         isOpen={isProfileModalOpen}
@@ -441,12 +595,19 @@ function App() {
 
 
 
+      <DailyChallengeModal 
+        isOpen={isDailyConfirmOpen}
+        onClose={() => setIsDailyConfirmOpen(false)}
+        onConfirm={confirmDailyChallenge}
+        isLoading={isDailyLoading}
+      />
+
       <GlobalRankingModal 
         isOpen={isGlobalRankingOpen}
         onClose={() => setIsGlobalRankingOpen(false)}
-        onWatchReplay={(moves, name, scrambleStr) => {
+        onWatchReplay={(moves, name, scramble) => {
           setIsGlobalRankingOpen(false);
-          handleWatchReplay(moves, name, scrambleStr.split(' '));
+          handleWatchReplay(moves, name, scramble);
         }}
       />
     </div>

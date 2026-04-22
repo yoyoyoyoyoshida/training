@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Move } from '../utils/cubeState';
 
 interface FlickButtonProps {
@@ -10,10 +10,9 @@ interface FlickButtonProps {
   topRight?: string;
   disabled?: boolean;
   onSelect: (move: string) => void;
-  isRot?: boolean; 
 }
 
-function FlickButton({ base, top, left, right, bottom, topRight, disabled, onSelect, isRot }: FlickButtonProps) {
+function FlickButton({ base, top, left, right, bottom, topRight, disabled, onSelect }: FlickButtonProps) {
   const [isActive, setIsActive] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [selection, setSelection] = useState<string | null>(base);

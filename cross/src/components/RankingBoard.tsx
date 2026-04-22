@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { collection, query, where, onSnapshot, Timestamp, getDocs, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
@@ -42,7 +42,7 @@ export function RankingBoard({ batchId, onWatchReplay }: RankingBoardProps) {
       });
       parsed.sort((a, b) => {
         if (a.moveCount !== b.moveCount) return a.moveCount - b.moveCount;
-        return a.timeTaken - b.timeTaken;
+        return (a.timeTaken || 0) - (b.timeTaken || 0);
       });
       setDailyTop(parsed[0] || null);
       setLoading(false);

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { collection, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { collection, query, where, getDocs, Timestamp, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { getDailyScramble } from '../utils/scrambleGenerator';
 
@@ -29,9 +29,11 @@ export function GlobalRankingModal({ isOpen, onClose, onWatchReplay }: GlobalRan
   const [dailyScores, setDailyScores] = useState<ScoreEntry[]>([]);
   const [monthlyStats, setMonthlyStats] = useState<UserStat[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
+      setError(null);
       if (tab === 'DAILY') fetchDailyScores();
       else fetchMonthlyStats();
     }
@@ -41,26 +43,43 @@ export function GlobalRankingModal({ isOpen, onClose, onWatchReplay }: GlobalRan
     setLoading(true);
     try {
       const daily = getDailyScramble();
+      // インデックス不要なシンプルなクエリ
       const q = query(
         collection(db, 'scores'),
-        where('batchId', '==', daily.batchId)
+        where('batchId', '==', daily.batchId),
+        limit(100) // 多めに取得してメモリでソート
       );
+      
       const snap = await getDocs(q);
-      let results: ScoreEntry[] = [];
+      const results: ScoreEntry[] = [];
+      
       snap.forEach(doc => {
         const d = doc.data();
-        results.push({ id: doc.id, ...d } as ScoreEntry);
+        if (d.moveCount !== undefined && d.timeTaken !== undefined) {
+          results.push({ 
+            id: doc.id, 
+            userName: d.userName || 'Unknown',
+            moveCount: d.moveCount,
+            timeTaken: d.timeTaken,
+            moveLog: d.moveLog,
+            scramble: d.scramble
+          });
+        }
       });
-      // Sort: Moves ASC, then Time ASC
+
+      // 手数(ASC) -> タイム(ASC) でソート
       results.sort((a, b) => {
         if (a.moveCount !== b.moveCount) return a.moveCount - b.moveCount;
         return a.timeTaken - b.timeTaken;
       });
+
       setDailyScores(results.slice(0, 10));
     } catch (e) {
-      console.error(e);
+      console.error("Daily ranking fetch error:", e);
+      setError("データの取得に失敗しました");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const fetchMonthlyStats = async () => {
@@ -68,11 +87,14 @@ export function GlobalRankingModal({ isOpen, onClose, onWatchReplay }: GlobalRan
     try {
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      
+      // 作成日時のみで絞り込み（インデックス依存を最小化）
       const q = query(
         collection(db, 'scores'),
         where('createdAt', '>=', Timestamp.fromDate(startOfMonth)),
-        orderBy('createdAt', 'desc')
+        limit(500)
       );
+      
       const snap = await getDocs(q);
       const userMap = new Map<string, { name: string, count: number }>();
       
@@ -80,8 +102,10 @@ export function GlobalRankingModal({ isOpen, onClose, onWatchReplay }: GlobalRan
         const d = doc.data();
         if (d.batchId && String(d.batchId).startsWith('FREE_PRACTICE_')) {
           const uid = d.userId;
-          const current = userMap.get(uid) || { name: d.userName, count: 0 };
-          userMap.set(uid, { name: d.userName, count: current.count + 1 });
+          if (uid) {
+            const current = userMap.get(uid) || { name: d.userName || 'Guest', count: 0 };
+            userMap.set(uid, { name: current.name, count: current.count + 1 });
+          }
         }
       });
 
@@ -90,12 +114,15 @@ export function GlobalRankingModal({ isOpen, onClose, onWatchReplay }: GlobalRan
         userName: data.name,
         count: data.count
       }));
+
       stats.sort((a, b) => b.count - a.count);
       setMonthlyStats(stats.slice(0, 10));
     } catch (e) {
-      console.error(e);
+      console.error("Monthly stats fetch error:", e);
+      setError("データの取得に失敗しました");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   if (!isOpen) return null;
@@ -104,7 +131,7 @@ export function GlobalRankingModal({ isOpen, onClose, onWatchReplay }: GlobalRan
     <div style={{
       position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
       background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 4000,
       padding: '1rem'
     }}>
       <div style={{
@@ -140,7 +167,7 @@ export function GlobalRankingModal({ isOpen, onClose, onWatchReplay }: GlobalRan
               color: tab === 'DAILY' ? '#000' : '#fff', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s'
             }}
           >
-            本日の1発勝負
+            全国大会
           </button>
           <button 
             onClick={() => setTab('MONTHLY')}
@@ -157,9 +184,14 @@ export function GlobalRankingModal({ isOpen, onClose, onWatchReplay }: GlobalRan
         <div style={{ minHeight: '300px', maxHeight: '60vh', overflowY: 'auto' }}>
           {loading ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>読み込み中...</div>
+          ) : error ? (
+            <div style={{ textAlign: 'center', padding: '3rem', color: '#ff4444' }}>{error}</div>
           ) : tab === 'DAILY' ? (
             dailyScores.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>まだ記録がありません</div>
+              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+                まだ本日の記録がありません<br />
+                <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>1発勝負を解いてランキングに載ろう！</span>
+              </div>
             ) : (
               dailyScores.map((s, i) => (
                 <div key={s.id} style={{ display: 'flex', alignItems: 'center', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginBottom: '0.5rem', border: '1px solid rgba(255,255,255,0.05)', gap: '10px' }}>
@@ -181,15 +213,19 @@ export function GlobalRankingModal({ isOpen, onClose, onWatchReplay }: GlobalRan
               ))
             )
           ) : (
-            monthlyStats.map((s, i) => (
-              <div key={s.userId} style={{ display: 'flex', alignItems: 'center', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginBottom: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ width: '30px', fontWeight: 800, color: i < 3 ? 'var(--accent-green)' : 'var(--text-secondary)' }}>#{i+1}</div>
-                <div style={{ flex: 1, fontWeight: 700 }}>{s.userName}</div>
-                <div style={{ textAlign: 'right', fontWeight: 800, color: 'var(--accent-green)' }}>
-                  {s.count} <span style={{ fontSize: '0.7rem' }}>回答</span>
+            monthlyStats.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>まだ記録がありません</div>
+            ) : (
+              monthlyStats.map((s, i) => (
+                <div key={s.userId} style={{ display: 'flex', alignItems: 'center', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', marginBottom: '0.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ width: '30px', fontWeight: 800, color: i < 3 ? 'var(--accent-green)' : 'var(--text-secondary)' }}>#{i+1}</div>
+                  <div style={{ flex: 1, fontWeight: 700 }}>{s.userName}</div>
+                  <div style={{ textAlign: 'right', fontWeight: 800, color: 'var(--accent-green)' }}>
+                    {s.count} <span style={{ fontSize: '0.7rem' }}>回答</span>
+                  </div>
                 </div>
-              </div>
-            ))
+              ))
+            )
           )}
         </div>
       </div>
