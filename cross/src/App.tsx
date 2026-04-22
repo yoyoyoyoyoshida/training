@@ -265,15 +265,11 @@ function App() {
         </div>
         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
           <button 
+            className="ranking-trigger-btn" 
             onClick={() => setIsGlobalRankingOpen(true)}
-            style={{ 
-              background: 'rgba(255,255,255,0.05)', border: '1px solid var(--card-border)',
-              color: '#fff', padding: '0.5rem 1rem', borderRadius: '8px', 
-              cursor: 'pointer', fontSize: '0.8rem', fontWeight: 800,
-              display: 'flex', alignItems: 'center', gap: '0.5rem'
-            }}
+            title="ランキングを表示"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
               <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
               <path d="M4 22h16"></path>
@@ -281,7 +277,7 @@ function App() {
               <path d="M12 22v-4"></path>
               <path d="M17 4H7a2 2 0 0 0-2 2v3a7 7 0 0 0 14 0V6a2 2 0 0 0-2-2Z"></path>
             </svg>
-            ランキング
+            <span className="hide-on-mobile" style={{ marginLeft: '0.5rem' }}>ランキング</span>
           </button>
           {user ? (
             <div 
@@ -294,7 +290,7 @@ function App() {
               className="header-user-profile"
             >
               <img src={user.photoURL || ''} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--accent-blue)' }} />
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div className="hide-on-mobile" style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#fff' }}>{profileName}</span>
                 <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>クリックで名前変更</span>
               </div>
@@ -304,12 +300,25 @@ function App() {
               Googleでログイン
             </button>
           )}
-          <a href="/training/" className="back-link">← ポータルへ戻る</a>
+          <a href="/training/" className="back-link">
+            <span className="hide-on-mobile">← ポータルへ戻る</span>
+            <span className="show-only-mobile">← 戻る</span>
+          </a>
         </div>
       </header>
 
       <div className="main-content">
         <div className="scene-container">
+          <div className="stats-overlay">
+            <div className="stat-card">
+              <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 800 }}>TIME</span>
+              <span style={{ fontSize: '1.2rem', fontWeight: 800, fontFamily: 'monospace' }}>{formatTime(timeMs)}</span>
+            </div>
+            <div className="stat-card">
+              <span style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', fontWeight: 800 }}>MOVES</span>
+              <span style={{ fontSize: '1.2rem', fontWeight: 800, fontFamily: 'monospace' }}>{moveCount}</span>
+            </div>
+          </div>
           <Canvas camera={{ position: [6, 6, 12], fov: 45 }}>
             <color attach="background" args={['#050505']} />
             <ambientLight intensity={0.8} />
@@ -320,7 +329,8 @@ function App() {
         </div>
 
         <div className="controls-panel">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', background: 'var(--card-bg)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
+          {/* PC用統計パネル (モバイルではCSSで非表示) */}
+          <div className="hide-on-mobile" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', background: 'var(--card-bg)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
             <div>
               <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.05em' }}>TIME</div>
               <div style={{ fontSize: '1.8rem', fontWeight: 800, fontFamily: 'monospace', color: '#fff', lineHeight: 1 }}>{formatTime(timeMs)}<span style={{fontSize:'1rem'}}>s</span></div>
@@ -360,6 +370,8 @@ function App() {
           </button>
         </div>
 
+        <VirtualPad onInputMove={handleInputMove} disabled={status === 'SOLVED' || !!replayData} />
+
         <RankingBoard 
           batchId={currentBatchId} 
           onWatchReplay={(moves, name, scramble) => {
@@ -386,8 +398,6 @@ function App() {
           </a>
         </footer>
       </div>
-
-      <VirtualPad onInputMove={handleInputMove} disabled={status === 'SOLVED'} />
 
       {replayData && (
         <div style={{
@@ -426,6 +436,8 @@ function App() {
         onClose={() => setIsProfileModalOpen(false)}
         onSave={handleProfileSave}
       />
+
+
 
       <GlobalRankingModal 
         isOpen={isGlobalRankingOpen}
