@@ -30,7 +30,7 @@ function App() {
   
   const [cubies, setCubies] = useState(() => performMove(createInitialState(), 'x2'));
   const [status, setStatus] = useState<GameStatus>('IDLE');
-  const [currentBatchId, setCurrentBatchId] = useState(() => getDailyScramble().batchId);
+  const [currentBatchId, setCurrentBatchId] = useState<string>('');
   const [moveCount, setMoveCount] = useState(0);
   const [timeMs, setTimeMs] = useState(0);
   const [moveLog, setMoveLog] = useState<Move[]>([]); 
@@ -251,20 +251,24 @@ function App() {
   };
 
   const handleInputMove = (move: Move) => {
-    if (status === 'SOLVED' || replayData) return;
+    if (replayData) return;
 
     const mCore = move.replace(/['2\sw]/gi, '').toLowerCase();
     const isPhysical = !['x', 'y', 'z'].includes(mCore) && mCore.length > 0;
 
-    if (status === 'IDLE' && isPhysical) {
+    // ゲーム開始の判定（モードが選択され、かつIDがある時のみタイマー開始）
+    if (status === 'IDLE' && isPhysical && currentBatchId && currentBatchId !== '') {
       startTimer();
     }
 
     setCubies(prev => performMove(prev, move));
-    if (isPhysical) {
+
+    // プレイ中（PLAYING）かつ、何らかのモードが進行中（batchIdあり）の時のみ記録を更新
+    if (status === 'PLAYING' && isPhysical && currentBatchId && currentBatchId !== '') {
       setMoveCount(prev => prev + 1);
       setMoveLog(prev => [...prev, move]);
-    } else {
+    } else if (status === 'PLAYING' && currentBatchId && currentBatchId !== '') {
+      // 持ち替えなどは移動回数には含めないがログには残す
       setMoveLog(prev => [...prev, move]);
     }
   };
@@ -521,11 +525,11 @@ function App() {
           )}
         </div>
 
-        <VirtualPad onInputMove={handleInputMove} disabled={status === 'SOLVED' || !!replayData} />
+        <VirtualPad onInputMove={handleInputMove} disabled={!!replayData} />
 
         <div className="hide-on-mobile">
           <RankingBoard 
-            batchId={currentBatchId} 
+            batchId={currentBatchId || getDailyScramble().batchId} 
             onWatchReplay={(moves, name, scramble) => {
               handleWatchReplay(moves, name, scramble);
             }} 
@@ -582,7 +586,7 @@ function App() {
         initialName={profileName}
         onClose={() => setIsResultModalOpen(false)}
         onSubmit={handleResultSubmit}
-        isTrainingMode={currentBatchId.startsWith('FREE_PRACTICE_')}
+        isTrainingMode={!currentBatchId.startsWith('DAILY_')}
         trainingStats={trainingStats}
         onLogin={login}
       />

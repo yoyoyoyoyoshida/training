@@ -32,6 +32,10 @@ function FlickButton({ base, top, left, right, bottom, topRight, disabled, onSel
   };
 
   const moveInteraction = (x: number, y: number) => {
+    if (disabled) {
+      if (isActive) setIsActive(false);
+      return;
+    }
     if (!isActive && !isHovered) return;
 
     let dx, dy;
