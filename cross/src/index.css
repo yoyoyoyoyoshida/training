@@ -113,20 +113,19 @@ body {
 
 /* Virtual Pad Balloon (リッチなプレミアムデザイン) */
 .virtual-pad-balloon {
-  background: linear-gradient(145deg, rgba(30, 40, 60, 0.85), rgba(5, 10, 20, 0.95));
-  backdrop-filter: blur(25px) saturate(180%);
-  border: 1px solid rgba(50, 205, 50, 0.2);
-  border-radius: 28px;
-  padding: 1.5rem;
-  box-shadow: 
-    0 25px 60px rgba(0, 0, 0, 0.8),
-    0 0 30px rgba(50, 205, 50, 0.1); /* 微かなグロー効果 */
-  z-index: 1000;
-  width: 340px;
   position: fixed;
-  bottom: 40px;
-  right: 40px;
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  bottom: 280px; /* PC版：ボタンの上あたりに初期配置 */
+  left: 50%;
+  margin-left: -130px;
+  width: 260px;
+  padding: 1.2rem;
+  background: linear-gradient(145deg, rgba(30, 40, 60, 0.9), rgba(10, 10, 20, 0.95));
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(50, 205, 50, 0.1);
+  backdrop-filter: blur(20px);
+  z-index: 2000;
+  transition: box-shadow 0.3s ease;
 }
 
 .virtual-pad-balloon:hover {
@@ -141,14 +140,16 @@ body {
     position: relative;
     bottom: auto;
     right: auto;
+    left: auto;
+    margin-left: 0;
     width: 100%;
-    margin-top: 0.6rem; /* 1.5rem から大幅に削減 */
+    margin-top: 0.6rem;
     background: linear-gradient(145deg, rgba(20, 30, 50, 0.9), rgba(0, 0, 0, 0.9));
     border-radius: 20px;
     box-shadow: none;
     backdrop-filter: none;
     transform: none !important;
-    padding: 1rem; /* パディングも少し詰める */
+    padding: 1rem;
   }
 
   .controls-section {

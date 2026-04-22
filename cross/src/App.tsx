@@ -424,7 +424,7 @@ function App() {
           </div>
         </div>
 
-        <Canvas camera={{ position: [6.5, 6.5, 6.5], fov: 45 }}>
+        <Canvas camera={{ position: [5, 6.5, 8.5], fov: 45 }}>
           <ambientLight intensity={0.8} />
           <pointLight position={[10, 10, 10]} intensity={1.5} />
           <pointLight position={[-10, -10, -10]} intensity={0.5} color="var(--accent-blue)" />
@@ -435,23 +435,47 @@ function App() {
       </main>
 
       <section className="controls-section">
-        {/* モード選択エリア */}
+        {/* モード選択エリア または リプレイ中ステータス */}
         <div style={{ 
           display: 'flex', gap: '0.4rem', flexWrap: 'wrap', 
           minHeight: '32px', alignItems: 'center', justifyContent: 'center',
           marginBottom: '0.2rem' 
         }}>
-          {status === 'PLAYING' ? (
-            <div style={{ 
-              width: '100%', padding: '0.6rem', 
-              background: currentBatchId.startsWith('DAILY_') ? 'rgba(255,20,147,0.1)' : 'rgba(0,122,255,0.1)', 
-              border: `2px solid ${currentBatchId.startsWith('DAILY_') ? '#ff1493' : 'var(--accent-blue)'}`, 
-              borderRadius: '10px', 
-              color: currentBatchId.startsWith('DAILY_') ? '#ff1493' : 'var(--accent-blue)',
-              textAlign: 'center', fontWeight: 900, fontSize: '1rem',
+          {replayData ? (
+            <div style={{
+              width: '100%', background: 'var(--accent-blue)', color: '#fff',
+              padding: '0.8rem', borderRadius: '12px', display: 'flex', 
+              alignItems: 'center', justifyContent: 'space-between',
+              boxShadow: '0 10px 30px rgba(0,122,255,0.3)',
               animation: 'pulse 2s infinite'
             }}>
-              {currentBatchId.startsWith('DAILY_') ? '🔥 真剣勝負中！' : '💪 トレーニング中！'}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                <span style={{ fontSize: '1.2rem' }}>▶</span>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ fontSize: '0.6rem', opacity: 0.8, fontWeight: 800 }}>REPLAYING</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 900 }}>{replayData.userName} さんの回答</div>
+                </div>
+              </div>
+              <button 
+                onClick={() => { setReplayData(null); replayRef.current = false; }}
+                style={{ 
+                  background: '#fff', color: 'var(--accent-blue)', 
+                  border: 'none', borderRadius: '8px', padding: '6px 16px', 
+                  fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer' 
+                }}
+              >
+                停止
+              </button>
+            </div>
+          ) : status === 'PLAYING' ? (
+            <div style={{ 
+              width: '100%', padding: '0.6rem', 
+              background: 'rgba(255,255,255,0.03)', borderRadius: '12px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              textAlign: 'center', color: 'var(--accent-green)',
+              fontSize: '0.75rem', fontWeight: 900, letterSpacing: '0.1em'
+            }}>
+              ● {currentBatchId.startsWith('DAILY_') ? '全国大会 挑戦中' : 'トレーニング 実施中'}
             </div>
           ) : (
             <>
@@ -502,7 +526,9 @@ function App() {
           )}
         </div>
 
-        <VirtualPad onInputMove={handleInputMove} disabled={!!replayData} />
+        <div style={{ marginTop: '0.2rem' }}>
+          <VirtualPad onInputMove={handleInputMove} disabled={status === 'SOLVED' || !!replayData} />
+        </div>
 
         <div className="hide-on-mobile" style={{ marginTop: '2rem' }}>
           <RankingBoard 
@@ -525,25 +551,7 @@ function App() {
         </footer>
       </section>
 
-      {/* Modals & Overlays */}
-      {replayData && (
-        <div style={{
-          position: 'fixed', top: '80px', left: '50%', transform: 'translateX(-50%)',
-          background: 'rgba(0,122,255,0.9)', color: '#fff', padding: '0.8rem 1.5rem',
-          borderRadius: '50px', fontWeight: 800, zIndex: 1000, display: 'flex', gap: '1rem',
-          alignItems: 'center', boxShadow: '0 10px 30px rgba(0,122,255,0.4)',
-          border: '2px solid #fff'
-        }}>
-          <span className="pulse">● REPLAYING</span>
-          <span>{replayData.userName}'s Solve</span>
-          <button 
-            onClick={() => { setReplayData(null); replayRef.current = false; }}
-            style={{ background: '#fff', color: 'var(--accent-blue)', border: 'none', borderRadius: '20px', padding: '2px 10px', fontSize: '0.6rem', fontWeight: 900, cursor: 'pointer' }}
-          >
-            STOP
-          </button>
-        </div>
-      )}
+      {/* Modals */}
 
       <ResultModal 
         isOpen={isResultModalOpen}
