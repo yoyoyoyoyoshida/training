@@ -402,24 +402,32 @@ function App() {
       </header>
 
       <main className="cube-container">
-        {/* 統計オーバーレイ */}
+        {/* 統計オーバーレイ (TIME) */}
         <div style={{ 
           position: 'absolute', top: '1rem', left: '1rem', 
-          display: 'flex', gap: '0.8rem', zIndex: 50, pointerEvents: 'none' 
+          zIndex: 50, pointerEvents: 'none' 
         }}>
           <div className="stat-card" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.6rem', fontWeight: 800 }}>TIME</div>
             <div style={{ fontSize: '1.2rem', fontWeight: 800, fontFamily: 'monospace', color: 'var(--accent-green)', lineHeight: 1 }}>{(timeMs / 1000).toFixed(2)}s</div>
           </div>
+        </div>
+
+        {/* 統計オーバーレイ (MOVES) */}
+        <div style={{ 
+          position: 'absolute', top: '1rem', right: '1rem', 
+          zIndex: 50, pointerEvents: 'none' 
+        }}>
           <div className="stat-card" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.6rem', fontWeight: 800 }}>MOVES</div>
             <div style={{ fontSize: '1.2rem', fontWeight: 800, fontFamily: 'monospace', color: '#fff', lineHeight: 1 }}>{moveCount}</div>
           </div>
         </div>
 
-        <Canvas camera={{ position: [5, 5, 5], fov: 45 }}>
-          <ambientLight intensity={0.5} />
-          <pointLight position={[10, 10, 10]} intensity={1} />
+        <Canvas camera={{ position: [6.5, 6.5, 6.5], fov: 45 }}>
+          <ambientLight intensity={0.8} />
+          <pointLight position={[10, 10, 10]} intensity={1.5} />
+          <pointLight position={[-10, -10, -10]} intensity={0.5} color="var(--accent-blue)" />
           <RubiksCube cubies={cubies} />
           <OrbitControls enablePan={false} enableZoom={false} />
         </Canvas>
