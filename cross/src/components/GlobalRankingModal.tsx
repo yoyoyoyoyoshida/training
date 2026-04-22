@@ -155,7 +155,7 @@ export function GlobalRankingModal({ isOpen, onClose, onWatchReplay }: GlobalRan
             <path d="M12 22v-4"></path>
             <path d="M17 4H7a2 2 0 0 0-2 2v3a7 7 0 0 0 14 0V6a2 2 0 0 0-2-2Z"></path>
           </svg>
-          殿堂入りランキング
+          全国上位者
         </h2>
 
         <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '12px' }}>
@@ -164,17 +164,19 @@ export function GlobalRankingModal({ isOpen, onClose, onWatchReplay }: GlobalRan
             style={{
               flex: 1, padding: '0.8rem', borderRadius: '8px', border: 'none',
               background: tab === 'DAILY' ? 'var(--accent-green)' : 'transparent',
-              color: tab === 'DAILY' ? '#000' : '#fff', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s'
+              color: tab === 'DAILY' ? '#000' : '#fff', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s',
+              fontSize: '0.75rem'
             }}
           >
-            全国大会
+            本日の手数上位
           </button>
           <button 
             onClick={() => setTab('MONTHLY')}
             style={{
               flex: 1, padding: '0.8rem', borderRadius: '8px', border: 'none',
               background: tab === 'MONTHLY' ? 'var(--accent-green)' : 'transparent',
-              color: tab === 'MONTHLY' ? '#000' : '#fff', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s'
+              color: tab === 'MONTHLY' ? '#000' : '#fff', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s',
+              fontSize: '0.75rem'
             }}
           >
             今月のガチ練習者

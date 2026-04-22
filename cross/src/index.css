@@ -54,7 +54,7 @@ body {
 .controls-section {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.5rem;
 }
 
 /* スマホ版（モバイル）最適化レイアウト */
@@ -96,7 +96,7 @@ body {
 
   .controls-section {
     flex: 0 0 auto;
-    padding: 1rem;
+    padding: 0;
     gap: 0.8rem;
     background: linear-gradient(to top, #000 80%, transparent);
     border-top: 1px solid var(--card-border);
@@ -142,12 +142,17 @@ body {
     bottom: auto;
     right: auto;
     width: 100%;
-    margin-top: 1.5rem;
+    margin-top: 0.6rem; /* 1.5rem から大幅に削減 */
     background: linear-gradient(145deg, rgba(20, 30, 50, 0.9), rgba(0, 0, 0, 0.9));
     border-radius: 20px;
     box-shadow: none;
     backdrop-filter: none;
     transform: none !important;
+    padding: 1rem; /* パディングも少し詰める */
+  }
+
+  .controls-section {
+    padding: 0; /* 上下パディングを削除 */
   }
 }
 

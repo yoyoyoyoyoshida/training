@@ -427,8 +427,12 @@ function App() {
       </main>
 
       <section className="controls-section">
-
-        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', minHeight: '40px', alignItems: 'center', justifyContent: 'center' }}>
+        {/* モード選択エリア */}
+        <div style={{ 
+          display: 'flex', gap: '0.4rem', flexWrap: 'wrap', 
+          minHeight: '32px', alignItems: 'center', justifyContent: 'center',
+          marginBottom: '0.2rem' 
+        }}>
           {status === 'PLAYING' ? (
             <div style={{ 
               width: '100%', padding: '0.6rem', 
@@ -447,7 +451,9 @@ function App() {
                 className="primary-btn" 
                 onClick={() => {
                   if (hasCompletedDaily || hasStartedDaily) {
-                    alert("本日の全国大会（1発勝負）はすでに挑戦済みです。また明日挑戦してください！");
+                    if (window.confirm("本日は挑戦済みです！また明日挑戦してください！\n本日のランキングを見ますか？")) {
+                      setIsGlobalRankingOpen(true);
+                    }
                   } else {
                     handleDailyScrambleClick();
                   }
@@ -501,7 +507,7 @@ function App() {
 
         <footer style={{ 
           textAlign: 'center', 
-          padding: '1.5rem 0 0.5rem', 
+          padding: '0.4rem 0', 
           marginTop: 'auto',
           fontSize: '0.7rem',
           color: 'var(--text-secondary)',
