@@ -16,14 +16,19 @@ interface FlickButtonProps {
 function FlickButton({ base, top, left, right, bottom, topRight, disabled, onSelect, isRot }: FlickButtonProps) {
   const [isActive, setIsActive] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [selection, setSelection] = useState<string>(base);
+  const [selection, setSelection] = useState<string | null>(base);
+  const [isCancelArea, setIsCancelArea] = useState(false);
   const startPos = useRef({ x: 0, y: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // キャンセル判定のしきい値
+  const CANCEL_DISTANCE = 140;
 
   const startInteraction = (x: number, y: number) => {
     if (disabled) return;
     setIsActive(true);
     setSelection(base);
+    setIsCancelArea(false);
     startPos.current = { x, y };
   };
 
@@ -43,6 +48,14 @@ function FlickButton({ base, top, left, right, bottom, topRight, disabled, onSel
     
     const distance = Math.hypot(dx, dy);
 
+    // キャンセル圏外チェック
+    if (distance > CANCEL_DISTANCE) {
+      setIsCancelArea(true);
+      setSelection(null);
+      return;
+    }
+
+    setIsCancelArea(false);
     let current = base;
     if (distance > 20) {
       const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
@@ -60,12 +73,18 @@ function FlickButton({ base, top, left, right, bottom, topRight, disabled, onSel
   const endInteraction = () => {
     if (!isActive) return;
     setIsActive(false);
-    onSelect(selection);
+    
+    // 選択状態かつキャンセルエリアでない場合のみ実行
+    if (selection && !isCancelArea) {
+      onSelect(selection);
+    }
+    setSelection(base);
+    setIsCancelArea(false);
   };
 
   const Petal = ({ label, angle }: { label?: string, angle: number | 'center' }) => {
     if (!label) return null;
-    const isSelected = selection === label;
+    const isSelected = selection === label && !isCancelArea;
     const visible = isActive || isHovered;
 
     const radius = 50; 
@@ -85,7 +104,7 @@ function FlickButton({ base, top, left, right, bottom, topRight, disabled, onSel
       fontWeight: 800, 
       fontSize: isCenter ? '1rem' : '0.75rem',
       boxShadow: isSelected ? '0 0 15px var(--accent-blue)' : '0 2px 8px rgba(0,0,0,0.4)',
-      opacity: visible ? 1 : 0, 
+      opacity: visible ? (isCancelArea ? 0.3 : 1) : 0, 
       transform: isCenter 
         ? 'translate(-50%, -50%)' 
         : `translate(calc(-50% + ${cos * radius}px), calc(-50% + ${sin * radius}px)) scale(${isSelected ? 1.1 : 1})`,
@@ -105,7 +124,7 @@ function FlickButton({ base, top, left, right, bottom, topRight, disabled, onSel
       style={{ position: 'relative', width: '100%', height: '48px' }}
       onPointerEnter={() => !disabled && setIsHovered(true)}
       onPointerMove={(e) => !isActive && isHovered && moveInteraction(e.clientX, e.clientY)}
-      onPointerLeave={() => { setIsHovered(false); setSelection(base); }}
+      onPointerLeave={() => { setIsHovered(false); setSelection(base); setIsCancelArea(false); }}
     >
       <button
         ref={buttonRef}
@@ -113,9 +132,10 @@ function FlickButton({ base, top, left, right, bottom, topRight, disabled, onSel
         style={{ 
           width: '100%', height: '100%', position: 'absolute', zIndex: (isActive || isHovered) ? 10 : 1, touchAction: 'none',
           borderRadius: '12px',
-          background: isHovered ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          color: '#fff', fontWeight: 800, fontSize: '1rem', cursor: 'pointer'
+          background: isHovered ? (isCancelArea ? 'rgba(255,0,0,0.1)' : 'rgba(255,255,255,0.1)') : 'rgba(255,255,255,0.05)',
+          border: isCancelArea ? '1px solid rgba(255,0,0,0.5)' : '1px solid rgba(255,255,255,0.1)',
+          color: isCancelArea ? '#ff4444' : '#fff', fontWeight: 800, fontSize: '1rem', cursor: 'pointer',
+          transition: 'all 0.2s'
         }}
         onPointerDown={(e) => {
           buttonRef.current?.setPointerCapture(e.pointerId);
@@ -131,7 +151,7 @@ function FlickButton({ base, top, left, right, bottom, topRight, disabled, onSel
         onPointerCancel={endInteraction}
         onContextMenu={(e) => e.preventDefault()}
       >
-        <span style={{ opacity: (isActive || isHovered) ? 0 : 1 }}>{base}</span>
+        <span style={{ opacity: (isActive || isHovered) ? 0 : 1 }}>{isCancelArea ? '×' : base}</span>
       </button>
 
       <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 100 }}>
@@ -152,7 +172,7 @@ interface VirtualPadProps {
 }
 
 export function VirtualPad({ onInputMove, disabled }: VirtualPadProps) {
-  const baseMoves = ['R', 'L', 'U', 'D', 'F', 'B'];
+  const baseMoves = ['L', 'U', 'R', 'F', 'D', 'B'];
 
   return (
     <div style={{ 

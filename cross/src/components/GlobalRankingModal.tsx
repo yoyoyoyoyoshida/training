@@ -140,7 +140,7 @@ export function GlobalRankingModal({ isOpen, onClose, onWatchReplay }: GlobalRan
               color: tab === 'DAILY' ? '#000' : '#fff', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s'
             }}
           >
-            今日の1問
+            本日の1発勝負
           </button>
           <button 
             onClick={() => setTab('MONTHLY')}
@@ -150,7 +150,7 @@ export function GlobalRankingModal({ isOpen, onClose, onWatchReplay }: GlobalRan
               color: tab === 'MONTHLY' ? '#000' : '#fff', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s'
             }}
           >
-            今月の練習量
+            今月のガチ練習者
           </button>
         </div>
 

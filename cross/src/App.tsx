@@ -134,7 +134,7 @@ function App() {
       return;
     }
     if (!hasCompletedDaily) {
-      alert("まずはご自身で「今日の1問」をクリアして、スコアを登録してください！（ネタバレ防止のため）");
+      alert("まずはご自身で「本日の1発勝負」をクリアして、スコアを登録してください！（ネタバレ防止のため）");
       return;
     }
 
@@ -359,25 +359,27 @@ function App() {
             onClick={handleDailyScramble}
             style={{ flex: '1.5 0 200px', background: 'var(--accent-green)', color: '#000' }}
           >
-            今日の1問 (全国共通)
+            本日の1発勝負<br /><span style={{ fontSize: '0.8rem', opacity: 0.8 }}>(全国共通)</span>
           </button>
           <button 
             className="primary-btn" 
             onClick={handleRandomScramble}
             style={{ flex: '1 0 150px', background: '#333', fontSize: '0.9rem' }}
           >
-            フリートレーニング
+            トレーニング
           </button>
         </div>
 
         <VirtualPad onInputMove={handleInputMove} disabled={status === 'SOLVED' || !!replayData} />
 
-        <RankingBoard 
-          batchId={currentBatchId} 
-          onWatchReplay={(moves, name, scramble) => {
-            handleWatchReplay(moves, name, scramble);
-          }} 
-        />
+        <div className="hide-on-mobile">
+          <RankingBoard 
+            batchId={currentBatchId} 
+            onWatchReplay={(moves, name, scramble) => {
+              handleWatchReplay(moves, name, scramble);
+            }} 
+          />
+        </div>
 
         <footer style={{ 
           textAlign: 'center', 

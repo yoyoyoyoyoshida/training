@@ -92,7 +92,7 @@ export function RankingBoard({ batchId, onWatchReplay }: RankingBoardProps) {
               <circle cx="12" cy="8" r="7" />
               <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
             </svg>
-            <span>Today's #1</span>
+            <span>本日の1発勝負 第1位</span>
           </div>
           <span style={{ fontSize: '0.6rem', color: 'var(--accent-green)', background: 'rgba(50,205,50,0.1)', padding: '2px 6px', borderRadius: '4px' }}>LIVE</span>
         </h3>
@@ -123,7 +123,7 @@ export function RankingBoard({ batchId, onWatchReplay }: RankingBoardProps) {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF8800" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.203 1.15-3.003C7.5 14 8.5 14.5 8.5 14.5Z" />
           </svg>
-          <span>Monthly Top 3</span>
+          <span>今月のガチ練習者 Top 3</span>
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
           {monthlyTop.length > 0 ? (
