@@ -86,7 +86,7 @@ function Cubie({ state, activeMove }: CubieProps) {
           key={index}
           attach={`material-${index}`}
           color={color}
-          roughness={0.4}
+          roughness={0.2}
           metalness={0.0}
         />
       ))}

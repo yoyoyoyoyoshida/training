@@ -425,9 +425,10 @@ function App() {
         </div>
 
         <Canvas camera={{ position: [5, 6.5, 8.5], fov: 45 }}>
-          <ambientLight intensity={0.8} />
-          <pointLight position={[10, 10, 10]} intensity={1.5} />
-          <pointLight position={[-10, -10, -10]} intensity={0.5} color="var(--accent-blue)" />
+          <ambientLight intensity={2.0} />
+          <pointLight position={[10, 10, 10]} intensity={3.0} />
+          <pointLight position={[-10, -10, -10]} intensity={1.5} color="var(--accent-blue)" />
+          <directionalLight position={[5, 5, 5]} intensity={1.5} />
           <RubiksCube cubies={cubies} />
           <OrbitControls enablePan={false} enableZoom={false} />
         </Canvas>
