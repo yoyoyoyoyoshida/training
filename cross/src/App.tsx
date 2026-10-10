@@ -12,7 +12,7 @@ import { ProfileModal } from './components/ProfileModal';
 import { useAuth } from './hooks/useAuth';
 import { useProfile } from './hooks/useProfile';
 import { getDailyScramble } from './utils/scrambleGenerator';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, Timestamp, orderBy } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, Timestamp, orderBy, doc, runTransaction } from 'firebase/firestore';
 import { db } from './lib/firebase';
 import { GlobalRankingModal } from './components/GlobalRankingModal';
 import { DailyChallengeModal } from './components/DailyChallengeModal';
@@ -39,7 +39,10 @@ function App() {
   const [isGlobalRankingOpen, setIsGlobalRankingOpen] = useState(false);
   const [replayData, setReplayData] = useState<{ moves: Move[], userName: string } | null>(null);
   const [currentScramble, setCurrentScramble] = useState<string[]>([]);
-  const [hasCompletedDaily, setHasCompletedDaily] = useState(false); 
+  const [hasCompletedDaily, setHasCompletedDaily] = useState(false);
+  // インスペクション中（IDLE状態）に行った持ち替えを一時保持するバッファ。
+  // 最初の物理手でタイマーが起動する際に moveLog の先頭へ合流させる。
+  const [inspectionMoves, setInspectionMoves] = useState<Move[]>([]);
   const timerRef = useRef<number | null>(null);
   const replayRef = useRef<boolean>(false);
 
@@ -101,11 +104,13 @@ function App() {
     setTimeMs(0);
     setMoveLog([]);
     setReplayData(null);
+    setInspectionMoves([]);
     setStatus('IDLE');
   };
 
   useEffect(() => {
-    if (status === 'PLAYING') {
+    // リプレイ中はクロス判定を行わない（他人の解法再生時に誤ってSOLVEDになるのを防ぐ）
+    if (status === 'PLAYING' && !replayData) {
       const isSolved = checkCrossSolved(cubies, 'WHITE') || checkCrossSolved(cubies, 'YELLOW');
       if (isSolved) {
         setStatus('SOLVED');
@@ -122,7 +127,7 @@ function App() {
         setTimeout(() => setIsResultModalOpen(true), 500);
       }
     }
-  }, [cubies, status, user, currentBatchId]);
+  }, [cubies, status, user, currentBatchId, replayData]);
 
   const handleAutoSaveTraining = async () => {
     try {
@@ -260,12 +265,18 @@ function App() {
     const mCore = move.replace(/['2\sw]/gi, '').toLowerCase();
     const isPhysical = !['x', 'y', 'z'].includes(mCore) && mCore.length > 0;
 
-    // ゲーム開始の判定（モードが選択され、かつIDがある時のみタイマー開始）
-    if (status === 'IDLE' && isPhysical && currentBatchId && currentBatchId !== '') {
-      startTimer();
-      // 最初の1手も即座にカウント
-      setMoveCount(1);
-      setMoveLog([move]);
+    if (status === 'IDLE' && currentBatchId && currentBatchId !== '') {
+      if (!isPhysical) {
+        // インスペクション中の持ち替え（x/y/z）: タイマーは起動しないがバッファに保持。
+        // リプレイ再現のために moveLog に含める必要があるため記録する（手数カウントは対象外）。
+        setInspectionMoves(prev => [...prev, move]);
+      } else {
+        // 最初の物理手でタイマー開始。インスペクション中の持ち替えを moveLog の先頭に合流させる。
+        startTimer();
+        setMoveCount(1);
+        setMoveLog([...inspectionMoves, move]);
+        setInspectionMoves([]);
+      }
     }
 
     setCubies(prev => performMove(prev, move));
@@ -285,6 +296,7 @@ function App() {
     setTimeMs(0);
     setMoveLog([]);
     setReplayData(null);
+    setInspectionMoves([]);
   };
 
   const handleRandomScramble = () => {
@@ -298,6 +310,51 @@ function App() {
     setCurrentScramble(scramble);
     setStatus('IDLE');
     setCurrentBatchId('FREE_PRACTICE_' + Date.now()); 
+  };
+
+  /**
+   * 本日のスクランブルをFirestoreから取得する。
+   * 未生成（その日の最初のプレイヤー）の場合はトランザクションで
+   * アトミックに生成・保存し、同時アクセスによる二重生成を防ぐ。
+   */
+  const getOrCreateDailyScramble = async (batchId: string): Promise<string[]> => {
+    const scrambleRef = doc(db, 'dailyScrambles', batchId);
+
+    let resolvedScramble: string[] = [];
+
+    await runTransaction(db, async (transaction) => {
+      const snap = await transaction.get(scrambleRef);
+      if (snap.exists()) {
+        // すでに生成済み → そのまま使う
+        resolvedScramble = snap.data().scramble as string[];
+      } else {
+        // 本日最初のプレイヤー → 生成してアトミックに書き込む
+        const newScramble = generateScramble();
+        transaction.set(scrambleRef, {
+          scramble: newScramble,
+          batchId,
+          createdAt: serverTimestamp(),
+        });
+        resolvedScramble = newScramble;
+      }
+    });
+
+    return resolvedScramble;
+  };
+
+  /** 連続面回避ルールに従った20手スクランブルを生成する */
+  const generateScramble = (): string[] => {
+    const moves = ['R', "R'", 'R2', 'L', "L'", 'L2', 'U', "U'", 'U2', 'D', "D'", 'D2', 'F', "F'", 'F2', 'B', "B'", 'B2'];
+    const result: string[] = [];
+    let lastFace = '';
+    while (result.length < 20) {
+      const move = moves[Math.floor(Math.random() * moves.length)];
+      if (move[0] !== lastFace) {
+        result.push(move);
+        lastFace = move[0];
+      }
+    }
+    return result;
   };
 
   const handleDailyScrambleClick = () => {
@@ -314,10 +371,13 @@ function App() {
   const confirmDailyChallenge = async () => {
     if (!user) return;
     setIsDailyLoading(true);
-    
+
     try {
-      const daily = getDailyScramble();
-      
+      const daily = getDailyScramble(); // batchId 算出のためだけに使用
+
+      // トランザクションで全プレイヤー共通のスクランブルを取得・生成する
+      const sharedScramble = await getOrCreateDailyScramble(daily.batchId);
+
       await addDoc(collection(db, 'dailyChallenges'), {
         userId: user.uid,
         date: daily.batchId,
@@ -327,10 +387,9 @@ function App() {
       setHasStartedDaily(true);
       setIsDailyConfirmOpen(false);
 
-      const dailyScramble = getDailyScramble();
-      setCurrentScramble(dailyScramble.scramble);
-      setCubies(performMoves(performMove(createInitialState(), 'x2'), dailyScramble.scramble));
-      setCurrentBatchId(dailyScramble.batchId);
+      setCurrentScramble(sharedScramble);
+      setCubies(performMoves(performMove(createInitialState(), 'x2'), sharedScramble));
+      setCurrentBatchId(daily.batchId);
       startNewGame();
     } catch (err) {
       console.error("Challenge start failed:", err);

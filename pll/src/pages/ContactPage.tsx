@@ -1,4 +1,4 @@
-const contactUrl = 'https://math-365-24.com/puzzle/cubePage/toiawase/';
+const contactUrl = 'https://gachi-cube.com/contact.php';
 
 function ContactPage() {
   return (

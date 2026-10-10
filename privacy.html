@@ -6,138 +6,227 @@
     <title>プライバシーポリシー - GACHI-CUBE Training</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #050505;
-            --accent-green: #32CD32;
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.6);
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --card-border: rgba(255, 255, 255, 0.1);
-        }
-
         body {
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            font-family: 'Outfit', sans-serif;
-            line-height: 1.6;
+            background-color: #f0f2f5;
+            color: #333;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, 'Noto Sans JP', sans-serif;
+            line-height: 1.8;
             margin: 0;
-            padding: 2rem;
+            padding: 40px 20px;
             display: flex;
             justify-content: center;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             width: 100%;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            padding: 3rem;
-            backdrop-filter: blur(10px);
+            background: #ffffff;
+            padding: 60px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            box-sizing: border-box;
+        }
+
+        .header {
+            margin-bottom: 40px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
         }
 
         h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 2rem;
-            color: var(--accent-green);
-            text-align: center;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+
+        .last-updated {
+            font-size: 0.9rem;
+            color: #777;
         }
 
         h2 {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
-            margin-top: 2rem;
-            margin-bottom: 1rem;
-            border-left: 4px solid var(--accent-green);
-            padding-left: 1rem;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            color: #333;
         }
 
         p {
-            color: var(--text-secondary);
             margin-bottom: 1.5rem;
         }
 
         ul {
-            margin-bottom: 1.5rem;
-            color: var(--text-secondary);
+            padding-left: 20px;
+            margin-bottom: 20px;
         }
 
         li {
-            margin-bottom: 0.5rem;
+            margin-bottom: 10px;
         }
 
-        .close-btn {
-            display: block;
-            width: fit-content;
-            margin: 3rem auto 0;
-            padding: 1rem 3rem;
-            background: var(--accent-green);
-            color: #000;
-            border: none;
-            border-radius: 50px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: transform 0.2s, opacity 0.2s;
+        a {
+            color: #3498db;
+            text-decoration: none;
         }
 
-        .close-btn:hover {
-            transform: scale(1.05);
-            opacity: 0.9;
+        a:hover {
+            text-decoration: underline;
         }
 
         .footer-note {
-            margin-top: 4rem;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
             text-align: center;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        .close-btn-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .close-btn {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .close-btn:hover {
+            background-color: #2980b9;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+            .container {
+                padding: 30px 20px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            h2 {
+                font-size: 1.25rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <button class="close-btn" style="margin: 0 0 2rem auto;" onclick="window.close()">閉じる</button>
-        <h1>プライバシーポリシー</h1>
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h1>プライバシーポリシー</h1>
+                    <p class="last-updated">最終更新日：2026年5月6日</p>
+                </div>
+                <button type="button" class="close-btn" style="padding: 8px 20px; font-size: 0.9rem; margin-top: 5px;" onclick="closePrivacyTab()">閉じる</button>
+            </div>
+        </div>
         
         <p>GACHI-CUBE（以下「当サービス」）は、ユーザーの個人情報の保護を重要視し、以下の通りプライバシーポリシーを定めます。</p>
 
-        <h2>1. 取得する情報と利用目的</h2>
-        <p>当サービスでは、サービスの提供・改善および広告配信のために以下の情報を取得する場合があります。</p>
+        <h2>1. 個人情報の取得と利用目的</h2>
+        <p>当サービスでは、Google Firebase（Firebase Authentication）を利用したユーザー認証およびサービスの提供・改善のために、以下の情報を取得します。</p>
         <ul>
-            <li><strong>認証情報:</strong> Googleアカウント等を利用したログイン時に、ユーザー識別子（UID）および表示名、プロフィール画像URLを取得します。これらはユーザーのスコア管理およびランキング表示のために利用されます。</li>
-            <li><strong>利用データ:</strong> パズルの解法手順、タイム、手数、操作ログ等を、統計的な分析およびランキング表示のために取得します。</li>
-            <li><strong>技術情報:</strong> 端末の種類、OS、ブラウザの種類、IPアドレス等を、サービスの安定運用および不正防止のために取得する場合があります。</li>
+            <li><strong>認証情報（Googleログイン時）:</strong> ユーザー識別子（UID）、表示名、プロフィール画像URL、およびメールアドレスを取得します。これらの情報は、ユーザーの識別、パーソナライズされた体験の提供、およびスコア管理（ランキング表示等）のために利用されます。</li>
+            <li><strong>利用データ:</strong> パズルの解法データ（手順、タイム、手数等）および操作ログを、統計的な分析およびランキング表示のために取得します。</li>
+            <li><strong>技術的情報:</strong> サービスの安定運用、不正防止、およびパフォーマンス向上のため、端末情報やIPアドレス等を匿名化された形式で取得する場合があります。</li>
         </ul>
 
-        <h2>2. 第三者による情報収集</h2>
-        <p>当サービスでは、以下の第三者サービスを利用しており、各サービスがユーザーの情報を自動的に取得する場合があります。詳細は各サービスのプライバシーポリシーをご確認ください。</p>
+        <h2>2. 第三者による情報収集およびツール</h2>
+        <p>当サービスでは、利便性の向上および分析、広告配信のために以下の第三者サービスを利用しています。</p>
         
-        <h3>Firebase（Google LLC）</h3>
-        <p>データの保存、ユーザー認証、利用状況の分析のためにGoogle Firebaseを利用しています。FirebaseはCookie等の技術を使用してデータを収集する場合があります。</p>
-        <p><a href="https://policies.google.com/privacy" style="color: var(--accent-green);">Google プライバシーポリシー</a></p>
+        <h3>Google Firebase（Google LLC）</h3>
+        <p>当サービスは、インフラ基盤および認証システムとしてGoogle Firebaseを利用しています。これには、認証、データベース保存、アクセス解析（Firebase Analytics）が含まれます。FirebaseはCookieや端末識別子を使用してデータを収集する場合があります。</p>
+        <p>詳細はGoogleのプライバシーポリシーをご確認ください：<br>
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google プライバシーポリシー</a></p>
 
-        <h3>広告配信サービスについて</h3>
-        <p>当サービスでは、第三者配信の広告サービス（Google AdMob、忍者アドマックス、i-mobile等）を利用し、ユーザーの興味に応じた広告を表示するためにCookieや端末識別子を利用する場合があります。これにより、ユーザーのブラウザや端末を識別する場合がありますが、個人を特定するものではありません。</p>
-        <p>各サービスのプライバシーポリシーおよび広告配信の停止（オプトアウト）については、以下のリンクをご確認ください。</p>
+        <h3>広告配信サービス</h3>
+        <p>当サービスでは、第三者配信の広告サービスを利用し、ユーザーの興味に応じた広告を表示するためにCookieや端末識別子を利用する場合があります。これにより個人が特定されることはありません。利用するサービスはプラットフォームごとに以下の通りです。</p>
         <ul>
-            <li><a href="https://policies.google.com/technologies/ads" style="color: var(--accent-green);">Google AdMob（Google LLC）</a></li>
-            <li><a href="https://corp.ninja.co.jp/privacy/" style="color: var(--accent-green);">忍者アドマックス（忍者ツールズ株式会社）</a></li>
-            <li><a href="https://www.i-mobile.co.jp/privacy.html" style="color: var(--accent-green);">i-mobile（株式会社アイモバイル）</a></li>
+            <li><strong>モバイルアプリ版:</strong> Google AdMob（Google LLC）を利用します。</li>
+            <li><strong>Web版:</strong> i-mobile（株式会社アイモバイル）を利用します。</li>
         </ul>
 
-        <h2>3. 情報の管理と提供</h2>
-        <p>当サービスは、法令に基づく場合を除き、取得した情報をユーザーの同意なく第三者に提供することはありません。また、情報の漏洩、滅失の防止に努め、安全に管理いたします。</p>
+        <h3>パーソナライズ広告の無効化について</h3>
+        <p>ユーザーは、以下の方法でパーソナライズ広告（興味関心連動型広告）を無効化することができます。</p>
+        
+        <h4>1. モバイルアプリでの設定</h4>
+        <p>端末の設定により、広告識別子を利用した広告配信を制限できます。</p>
+        <ul>
+            <li><strong>iOS（iPhone/iPad）:</strong> 「設定」＞「プライバシーとセキュリティ」＞「Appleの広告」にて「パーソナライズされた広告」をオフにします。</li>
+            <li><strong>Android:</strong> 「設定」＞「Google」＞「広告」にて「広告IDをリセット」または「広告IDを削除」を行います。</li>
+        </ul>
 
-        <h2>4. 同意</h2>
-        <p>当サービスを利用することにより、ユーザーは本プライバシーポリシーに同意したものとみなされます。</p>
+        <h4>2. Webブラウザでの設定</h4>
+        <p>Googleの広告設定や、i-mobileのオプトアウトページより設定が可能です。</p>
+        <ul>
+            <li><a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener">Google 広告設定</a></li>
+            <li><a href="https://www.i-mobile.co.jp/privacy.html" target="_blank" rel="noopener">i-mobile オプトアウト</a></li>
+        </ul>
 
-        <button class="close-btn" onclick="window.close()">このページを閉じる</button>
+        <h2>3. 情報の管理と第三者提供</h2>
+        <p>当サービスは、取得した個人情報を適切に管理し、次の場合を除いて第三者に提供することはありません。</p>
+        <ul>
+            <li>ユーザー本人の同意がある場合</li>
+            <li>法令に基づき開示が必要な場合</li>
+            <li>利用目的の達成に必要な範囲内で業務を委託する場合（クラウドプラットフォーム等の利用）</li>
+        </ul>
+
+        <h2>4. 同意および変更</h2>
+        <p>ユーザーは、当サービスを利用することで本プライバシーポリシーに同意したものとみなされます。当サービスは、必要に応じて本ポリシーの内容を変更することがあります。重要な変更がある場合は、サービス内にて通知いたします。</p>
+
+        <div class="close-btn-wrapper">
+            <button type="button" class="close-btn" onclick="closePrivacyTab()">閉じる</button>
+        </div>
 
         <div class="footer-note">
             &copy; 2026 GACHI-CUBE
         </div>
     </div>
+
+    <script>
+        /**
+         * window.close() only works for tabs opened by script.
+         * Fallback: go back, or return to the training portal.
+         */
+        function closePrivacyTab() {
+            window.close();
+
+            // If the browser blocked close, leave this page after a short tick.
+            setTimeout(function () {
+                if (window.history.length > 1) {
+                    window.history.back();
+                    return;
+                }
+                // Same-directory portal (./) works for both /training/privacy.html
+                // and local file paths.
+                window.location.href = './';
+            }, 100);
+        }
+    </script>
 </body>
 </html>

@@ -33,8 +33,8 @@ function Layout({ children }: PropsWithChildren) {
   const isHomeActive = location.pathname === '/';
   const isAnnouncementsActive = location.pathname.startsWith('/announcements');
   const [menuOpen, setMenuOpen] = useState(false);
-  const contactUrl = 'https://math-365-24.com/puzzle/cubePage/toiawase/';
-  const privacyUrl = 'https://math-365-24.com/puzzle/cubePage/toiawase/privacy_policy.html';
+  const contactUrl = 'https://gachi-cube.com/contact.php';
+  const privacyUrl = 'https://gachi-cube.com/training/privacy.html';
 
   useEffect(() => {
     setMenuOpen(false);

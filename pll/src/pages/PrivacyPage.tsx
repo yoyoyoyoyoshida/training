@@ -1,4 +1,4 @@
-const privacyUrl = 'https://math-365-24.com/puzzle/cubePage/toiawase/privacy_policy.html';
+const privacyUrl = 'https://gachi-cube.com/training/privacy.html';
 
 function PrivacyPage() {
   return (
