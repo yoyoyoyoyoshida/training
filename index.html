@@ -325,6 +325,7 @@
             display: flex;
             align-items: center;
             gap: 0.8rem;
+            flex-wrap: wrap;
         }
 
         .section-tag-pill {
@@ -334,6 +335,14 @@
             letter-spacing: 0.1em;
             padding: 0.2rem 0.6rem;
             border-radius: 6px;
+        }
+
+        .section-header__logo {
+            width: 28px;
+            height: 28px;
+            display: block;
+            flex-shrink: 0;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
         }
 
         .section-tag-pill--official {
@@ -443,45 +452,59 @@
         }
 
         .platform-pill {
-            font-size: 0.72rem;
-            color: var(--muted);
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 0.25rem 0.65rem;
-            border-radius: 8px;
-            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.95);
+            background: rgba(57, 255, 20, 0.08);
+            border: 1px solid rgba(57, 255, 20, 0.35);
+            padding: 0.35rem 0.9rem;
+            border-radius: 999px;
+            box-shadow: 0 2px 12px rgba(57, 255, 20, 0.12);
+            letter-spacing: 0.03em;
+        }
+
+        .platform-pill__free {
+            color: var(--green);
+            font-weight: 900;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.4);
         }
 
         .card-main-info {
             display: flex;
-            gap: 1.3rem;
             align-items: center;
-            margin-bottom: 1.3rem;
-        }
-
-        .app-squircle {
-            width: 86px;
-            height: 86px;
-            border-radius: 22px;
-            overflow: hidden;
-            background: #000;
-            border: 2px solid color-mix(in srgb, var(--card-accent) 45%, transparent);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px color-mix(in srgb, var(--card-accent) 20%, transparent);
-            flex-shrink: 0;
+            justify-content: center;
+            text-align: center;
+            margin-bottom: 1.6rem;
             position: relative;
-        }
-
-        .app-squircle img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
         }
 
         .app-titles {
             display: flex;
             flex-direction: column;
-            gap: 0.2rem;
+            align-items: center;
+            gap: 0.35rem;
+            width: 100%;
+            position: relative;
+        }
+
+        /* タイトル背後のオーラバックライト */
+        .app-titles::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 220px;
+            height: 65px;
+            background: var(--card-glow);
+            filter: blur(45px);
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 0;
+            border-radius: 50%;
         }
 
         .app-sub {
@@ -494,11 +517,26 @@
         }
 
         .app-title-h3 {
-            font-size: clamp(1.6rem, 3vw, 1.95rem);
+            position: relative;
+            z-index: 1;
+            font-size: clamp(2.2rem, 5vw, 2.9rem);
             font-weight: 900;
-            color: #fff;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.015em;
+            line-height: 1.15;
             margin: 0;
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 
+                0 0 25px color-mix(in srgb, var(--card-accent) 70%, transparent),
+                0 4px 18px rgba(0, 0, 0, 0.9);
+            transition: text-shadow 0.3s var(--ease), transform 0.3s var(--ease);
+        }
+
+        .flagship-card:hover .app-title-h3 {
+            text-shadow: 
+                0 0 35px color-mix(in srgb, var(--card-accent) 95%, transparent),
+                0 0 70px color-mix(in srgb, var(--card-accent) 50%, transparent),
+                0 4px 22px rgba(0, 0, 0, 0.95);
         }
 
         .app-statement {
@@ -546,83 +584,80 @@
             flex-shrink: 0;
         }
 
-                /* アプリ実機プレイ画面プレビュー */
+                /* アプリ実機PR画像コンテナ（クリッピング枠を排除し見切れを防止） */
         .app-screen-preview {
             width: 100%;
-            height: 200px;
-            background: #050608;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 18px;
-            margin-bottom: 1.3rem;
+            height: clamp(380px, 48vw, 480px);
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            margin-bottom: 1.5rem;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
             display: flex;
-            flex-direction: column;
-            box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.9), 0 10px 25px rgba(0, 0, 0, 0.5);
-            transition: transform 0.35s var(--ease), border-color 0.35s;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none;
+            padding: 10px 0;
         }
 
-        .flagship-card:hover .app-screen-preview {
-            transform: scale(1.02);
-            border-color: color-mix(in srgb, var(--card-accent) 45%, transparent);
-        }
-
-        /* 公式アプリ実写グラフィック用プレビュー (全体表示) */
+        /* 公式アプリ実写グラフィック用プレビュー */
         .app-screen-preview--visual {
             height: clamp(380px, 48vw, 480px);
             align-items: center;
             justify-content: center;
-            background: #030407;
-            border-color: rgba(255, 255, 255, 0.16);
-            padding: 0.8rem;
+            background: transparent;
+            border: none;
+            padding: 10px 0;
         }
 
+        /* 画像背後のアンビエント光彩（柔らかく光を拡散） */
         .app-screen-preview__ambient {
             position: absolute;
-            inset: -20px;
+            inset: -15px;
             background-size: cover;
             background-position: center;
-            filter: blur(28px) brightness(0.28);
-            transform: scale(1.15);
-            opacity: 0.9;
-            transition: opacity 0.4s var(--ease);
+            filter: blur(48px) brightness(0.35);
+            transform: scale(1.05);
+            opacity: 0.75;
+            transition: opacity 0.4s var(--ease), transform 0.4s var(--ease);
             pointer-events: none;
+            border-radius: 24px;
         }
 
+        .flagship-card:hover .app-screen-preview__ambient {
+            opacity: 0.95;
+            transform: scale(1.1);
+        }
+
+        /* 画像本体：スマホ実機風のスタイリッシュなデバイスフレーム（外枠） */
         .app-screen-preview__img {
             position: relative;
             z-index: 1;
-            width: 100%;
+            width: auto;
+            max-width: 100%;
             height: 100%;
-            object-fit: contain;
+            max-height: 480px;
+            aspect-ratio: 1536 / 2752;
+            object-fit: cover;
             object-position: center center;
-            transition: transform 0.45s var(--ease), filter 0.45s var(--ease);
-            filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.8)) contrast(1.04);
+            border-radius: 26px;
+            border: 2.5px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 
+                0 20px 45px rgba(0, 0, 0, 0.85),
+                0 0 0 1px rgba(0, 0, 0, 0.8),
+                0 0 25px var(--card-glow);
+            transition: transform 0.4s var(--ease), border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
             display: block;
         }
 
         .flagship-card:hover .app-screen-preview__img {
-            transform: scale(1.03);
-            filter: drop-shadow(0 18px 36px rgba(0, 0, 0, 0.9)) contrast(1.08) brightness(1.02);
-        }
-
-        .app-screen-preview__badge {
-            position: absolute;
-            bottom: 0.65rem;
-            right: 0.75rem;
-            z-index: 2;
-            font-family: var(--mono);
-            font-size: 0.58rem;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            color: rgba(255, 255, 255, 0.9);
-            background: rgba(4, 6, 12, 0.75);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 0.22rem 0.55rem;
-            border-radius: 6px;
-            pointer-events: none;
+            transform: translateY(-4px);
+            border-color: color-mix(in srgb, var(--card-accent) 70%, rgba(255, 255, 255, 0.4));
+            box-shadow: 
+                0 25px 55px rgba(0, 0, 0, 0.92),
+                0 0 0 1px rgba(0, 0, 0, 0.9),
+                0 0 35px var(--card-glow);
         }
 
         .preview-phone-header {
@@ -752,12 +787,13 @@
             border-radius: 100px;
         }
 
-        /* ミニバッジ群（文言をコンパクトに整理） */
+        /* ミニバッジ群（文言をコンパクトに整理・中央揃え） */
         .app-mini-badges {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.45rem;
-            margin-bottom: 1.2rem;
+            justify-content: center;
+            gap: 0.48rem;
+            margin-bottom: 1.4rem;
         }
 
         .app-mini-badge {
@@ -773,10 +809,11 @@
             gap: 0.3rem;
         }
 
-        /* 公式ストアバッジ画像 (ホバーQRツールチップ対応) */
+        /* 公式ストアバッジ画像 (ホバーQRツールチップ対応・中央揃え) */
         .cta-store-badges {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 14px;
             flex-wrap: wrap;
             margin-top: auto;
@@ -1556,26 +1593,18 @@
              ========================================= -->
         <div id="section-mobile" class="section-header">
             <div class="section-header__title-wrap">
-                <span class="section-tag-pill section-tag-pill--official">OFFICIAL APPS</span>
-                <h2 class="section-header__title">GACHI CUBE 公式スマホアプリ</h2>
+                <img src="./logo.svg" alt="GACHI CUBE" class="section-header__logo">
+                <h2 class="section-header__title">公式スマホアプリ</h2>
+                <span class="platform-pill">iOS / Android 対応 · <span class="platform-pill__free">完全無料</span></span>
             </div>
-            <span class="section-header__sub">FLAGSHIP DRILLS</span>
         </div>
 
         <div class="official-apps-grid">
             <!-- App 1: PLL判断 -->
             <article class="flagship-card pll">
-                <div class="card-top-bar">
-                    <span class="flagship-badge">OFFICIAL APP</span>
-                    <span class="platform-pill">iOS / Android 対応 · 完全無料</span>
-                </div>
-
                 <div class="card-main-info">
-                    <div class="app-squircle">
-                        <img src="./sample_pll.png" alt="PLL 判断アプリ">
-                    </div>
                     <div class="app-titles">
-                        <h3 class="app-title-h3">PLL 判断</h3>
+                        <h3 class="app-title-h3">PLL判断</h3>
                     </div>
                 </div>
 
@@ -1588,9 +1617,6 @@
                         class="app-screen-preview__img"
                         loading="lazy"
                     >
-                    <div class="app-screen-preview__badge">
-                        <span>OFFICIAL SCREENSHOT</span>
-                    </div>
                 </div>
 
                 <!-- スッキリ整理した特徴バッジ -->
@@ -1672,20 +1698,11 @@
                 </div>
             </article>
 
-            <!-- App 2: クロス練習 -->
+            <!-- App 2: クロス完読み練習 -->
             <article class="flagship-card cross">
-                <div class="card-top-bar">
-                    <span class="flagship-badge">OFFICIAL APP</span>
-                    <span class="platform-pill">iOS / Android 対応 · 完全無料</span>
-                </div>
-
                 <div class="card-main-info">
-                    <div class="app-squircle">
-                        <img src="./sample_cross.png" alt="クロス 練習アプリ">
-                    </div>
                     <div class="app-titles">
-                        <span class="app-sub">Cross Speed Drills</span>
-                        <h3 class="app-title-h3">クロス 練習</h3>
+                        <h3 class="app-title-h3">クロス完読み練習</h3>
                     </div>
                 </div>
 
@@ -1698,9 +1715,6 @@
                         class="app-screen-preview__img"
                         loading="lazy"
                     >
-                    <div class="app-screen-preview__badge">
-                        <span>OFFICIAL SCREENSHOT</span>
-                    </div>
                 </div>
 
                 <!-- スッキリ整理した特徴バッジ -->
