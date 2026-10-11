@@ -952,280 +952,499 @@
         }
 
         /* =========================================
-           2. コミュニティWebアプリ (アーケード風ショーケース)
+           2. コミュニティWebアプリ (縦長大判ショーケースUI)
            ========================================= */
-        .community-arcade-grid {
+        .community-list-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 4rem;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 2.2rem;
+            margin-bottom: 4.5rem;
         }
 
-        .arcade-card {
-            background:
-                linear-gradient(170deg, rgba(20, 22, 34, 0.9) 0%, rgba(10, 11, 18, 0.9) 100%);
-            border: 1px solid rgba(0, 210, 255, 0.18);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65);
-            transition: all 0.35s var(--ease);
-            position: relative;
-        }
-
-        .arcade-card:hover {
-            transform: translateY(-6px);
-            border-color: rgba(0, 210, 255, 0.5);
-            box-shadow: 0 30px 75px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 210, 255, 0.2);
-        }
-
-        /* ゲームプレビュー領域 */
-        .arcade-screen {
-            position: relative;
-            width: 100%;
-            height: 160px;
-            background: #000;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .arcade-screen__bg {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 50% 50%, rgba(0, 210, 255, 0.15) 0%, transparent 70%);
-            z-index: 0;
-        }
-
-        .arcade-screen.f2l .arcade-screen__bg {
-            background: radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.18) 0%, transparent 70%);
-        }
-
-        .arcade-screen__vfx-grid {
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-            background-size: 24px 24px;
-            opacity: 0.6;
-        }
-
-        .arcade-screen__center-mock {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.4rem;
-            transition: transform 0.4s var(--ease);
-        }
-
-        .arcade-card:hover .arcade-screen__center-mock {
-            transform: scale(1.08);
-        }
-
-        .mock-digital-timer {
-            font-family: var(--mono);
-            font-size: 2.2rem;
-            font-weight: 900;
-            color: var(--blue);
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(0, 210, 255, 0.4);
-            padding: 0.3rem 1.2rem;
-            border-radius: 12px;
-            letter-spacing: 0.06em;
-            box-shadow: 0 0 25px rgba(0, 210, 255, 0.3);
-        }
-
-        .mock-3d-cube {
-            font-size: 3rem;
-            filter: drop-shadow(0 10px 20px rgba(168, 85, 247, 0.5));
-            animation: cubeSpin 8s infinite linear;
-        }
-
-        @keyframes cubeSpin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .arcade-badge-tag {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-            z-index: 2;
-            font-family: var(--mono);
-            font-size: 0.65rem;
-            font-weight: 800;
-            letter-spacing: 0.1em;
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
-            padding: 0.25rem 0.65rem;
-            border-radius: 100px;
-            backdrop-filter: blur(8px);
-        }
-
-        .arcade-content {
+        .community-app-card {
+            background: linear-gradient(175deg, rgba(18, 23, 38, 0.94) 0%, rgba(9, 12, 20, 0.98) 100%);
+            border: 1px solid rgba(0, 210, 255, 0.2);
+            border-radius: 28px;
             padding: 1.8rem;
             display: flex;
             flex-direction: column;
-            flex-grow: 1;
-        }
-
-        .arcade-title {
-            font-size: 1.45rem;
-            font-weight: 900;
-            color: #fff;
-            margin-bottom: 0.4rem;
-            letter-spacing: -0.01em;
-        }
-
-        .arcade-tagline {
-            font-size: 0.88rem;
-            line-height: 1.5;
-            color: var(--muted);
-            margin-bottom: 1rem;
-        }
-
-        .arcade-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem;
-            list-style: none;
-            margin-bottom: 1.3rem;
-        }
-
-        .arcade-tag-item {
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: var(--blue);
-            background: rgba(0, 210, 255, 0.08);
-            border: 1px solid rgba(0, 210, 255, 0.22);
-            padding: 0.2rem 0.6rem;
-            border-radius: 6px;
-        }
-
-        /* ゲーミング風クリエイターカード */
-        .creator-discord-card {
-            background: rgba(255, 255, 255, 0.035);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: var(--radius-md);
-            padding: 1rem;
-            margin-bottom: 1.5rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+            transition: transform 0.35s var(--ease), border-color 0.35s var(--ease), box-shadow 0.35s var(--ease);
             position: relative;
+            overflow: visible;
         }
 
-        .creator-discord-top {
+        .community-app-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(0, 210, 255, 0.55);
+            box-shadow: 0 30px 65px rgba(0, 0, 0, 0.85), 0 0 36px rgba(0, 210, 255, 0.22);
+        }
+
+        .community-app-card.f2l {
+            border-color: rgba(168, 85, 247, 0.22);
+        }
+
+        .community-app-card.f2l:hover {
+            border-color: rgba(168, 85, 247, 0.6);
+            box-shadow: 0 30px 65px rgba(0, 0, 0, 0.85), 0 0 36px rgba(168, 85, 247, 0.26);
+        }
+
+        /* 1. アプリ名 & 説明（カード上部に配置） */
+        .community-app-card__header {
+            margin-bottom: 1.25rem;
+            text-align: center;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 0.65rem;
+            flex-direction: column;
+            gap: 0.55rem;
         }
 
-        .creator-id-group {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
+        .community-app-card__title {
+            font-size: clamp(1.35rem, 2.3vw, 1.65rem);
+            font-weight: 900;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: -0.01em;
+            line-height: 1.35;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
         }
 
-        .creator-avatar-ring {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #00d2ff, #3b82f6);
+        .community-app-card__desc {
+            font-size: 0.88rem;
+            line-height: 1.65;
+            color: rgba(255, 255, 255, 0.78);
+            margin: 0;
+            padding: 0 0.5rem;
+        }
+
+        /* 2. 正方形サムネイル画像 (アプリ名の下・大迫力 1:1) */
+        .community-app-card__thumb-wrap {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            background: #050811;
+            border: 1.5px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 900;
-            font-size: 0.9rem;
-            color: #000;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            margin-bottom: 1.3rem;
+            transition: transform 0.35s var(--ease), border-color 0.35s var(--ease);
         }
 
-        .arcade-card.f2l .creator-avatar-ring {
-            background: linear-gradient(135deg, #a855f7, #ec4899);
+        .community-app-card:hover .community-app-card__thumb-wrap {
+            transform: scale(1.02);
+            border-color: rgba(255, 255, 255, 0.26);
         }
 
-        .creator-name-meta {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .creator-handle-name {
-            font-size: 0.92rem;
-            font-weight: 800;
-            color: #fff;
-        }
-
-        .creator-role-tag {
-            font-size: 0.65rem;
-            color: var(--gold);
-            font-weight: 700;
-        }
-
-        .creator-x-btn {
-            font-size: 0.76rem;
-            font-weight: 700;
-            color: #fff;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 0.35rem 0.75rem;
-            border-radius: 100px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            transition: all 0.2s;
-        }
-
-        .creator-x-btn:hover {
-            background: #fff;
-            color: #000;
-            transform: translateY(-1px);
-        }
-
-        .creator-quote-box {
-            background: rgba(0, 0, 0, 0.3);
-            border-left: 2px solid var(--blue);
-            padding: 0.5rem 0.8rem;
-            border-radius: 4px;
-            font-size: 0.82rem;
-            color: rgba(255, 255, 255, 0.85);
-            line-height: 1.5;
-            font-style: italic;
-        }
-
-        /* プレイ起動ボタン */
-        .btn-launch-game {
+        .community-app-card__thumb-wrap svg {
             width: 100%;
-            padding: 0.95rem;
-            background: linear-gradient(135deg, #00d2ff 0%, #0099ff 100%);
+            height: 100%;
+            display: block;
+        }
+
+        /* 3. プレイアクションボタン */
+        .community-app-card__action {
+            margin-bottom: 1.3rem;
+        }
+
+        .community-app-card__play-btn {
+            width: 100%;
+            padding: 0.95rem 1.4rem;
+            background: linear-gradient(135deg, #00d2ff 0%, #0088ff 100%);
             border: none;
             border-radius: 14px;
-            color: #040810;
+            color: #030712;
             font-weight: 900;
-            font-size: 0.98rem;
+            font-size: 1rem;
             letter-spacing: 0.02em;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.6rem;
-            box-shadow: 0 6px 20px rgba(0, 210, 255, 0.35);
             transition: all 0.25s var(--ease);
-            margin-top: auto;
+            box-shadow: 0 6px 20px rgba(0, 210, 255, 0.35);
         }
 
-        .btn-launch-game:hover {
+        .community-app-card.f2l .community-app-card__play-btn {
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.35);
+            color: #ffffff;
+        }
+
+        .community-app-card__play-btn:hover {
             transform: translateY(-2px);
-            background: linear-gradient(135deg, #33dcff 0%, #1ab0ff 100%);
-            box-shadow: 0 10px 30px rgba(0, 210, 255, 0.55);
+            box-shadow: 0 10px 28px rgba(0, 210, 255, 0.55);
+            filter: brightness(1.1);
+        }
+
+        .community-app-card.f2l .community-app-card__play-btn:hover {
+            box-shadow: 0 10px 28px rgba(168, 85, 247, 0.55);
+        }
+
+        /* 4. 開発者情報 (通常は大きめのアイコンと名前のみ / ホバーで詳細と審査通過アプリ数を表示) */
+        .community-app-card__dev-wrap {
+            position: relative;
+            margin-top: auto;
+            padding-top: 1.1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            outline: none;
+        }
+
+        .community-app-card__dev-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.8rem;
+            padding: 0.6rem 0.85rem;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .community-app-card__dev-trigger:hover,
+        .community-app-card__dev-wrap:hover .community-app-card__dev-trigger,
+        .community-app-card__dev-wrap:focus-within .community-app-card__dev-trigger {
+            background: rgba(0, 210, 255, 0.08);
+            border-color: rgba(0, 210, 255, 0.4);
+            box-shadow: 0 4px 18px rgba(0, 210, 255, 0.16);
+        }
+
+        .community-app-card.f2l .community-app-card__dev-trigger:hover,
+        .community-app-card.f2l .community-app-card__dev-wrap:hover .community-app-card__dev-trigger,
+        .community-app-card.f2l .community-app-card__dev-wrap:focus-within .community-app-card__dev-trigger {
+            background: rgba(168, 85, 247, 0.08);
+            border-color: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 4px 18px rgba(168, 85, 247, 0.18);
+        }
+
+        .community-app-card__dev-main {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        /* 開発者アイコン (やや大きめ 48px) */
+        .community-app-card__dev-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+            font-weight: 900;
+            color: #030712;
+            background: linear-gradient(135deg, #00d2ff, #3b82f6);
+            flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(0, 210, 255, 0.35);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            transition: transform 0.25s ease;
+        }
+
+        .community-app-card.f2l .community-app-card__dev-avatar {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            box-shadow: 0 4px 16px rgba(168, 85, 247, 0.35);
+            color: #ffffff;
+        }
+
+        .community-app-card__dev-wrap:hover .community-app-card__dev-avatar,
+        .community-app-card__dev-wrap:focus-within .community-app-card__dev-avatar {
+            transform: scale(1.06);
+        }
+
+        .community-app-card__dev-title-box {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .community-app-card__dev-role-label {
+            font-family: var(--mono);
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: var(--faint);
+        }
+
+        /* 開発者名 (やや大きめ 1.12rem) */
+        .community-app-card__dev-name {
+            font-size: 1.12rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.01em;
+            line-height: 1.2;
+        }
+
+        /* ホバーを促す控えめなヒントバッジ */
+        .community-app-card__dev-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.65);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.3rem 0.65rem;
+            border-radius: 999px;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .community-app-card__dev-hint .hint-arrow {
+            transition: transform 0.2s ease;
+            display: inline-block;
+        }
+
+        .community-app-card__dev-wrap:hover .community-app-card__dev-hint {
+            color: #ffffff;
+            background: rgba(0, 210, 255, 0.15);
+            border-color: rgba(0, 210, 255, 0.35);
+        }
+
+        .community-app-card.f2l .community-app-card__dev-wrap:hover .community-app-card__dev-hint {
+            background: rgba(168, 85, 247, 0.18);
+            border-color: rgba(168, 85, 247, 0.35);
+        }
+
+        .community-app-card__dev-wrap:hover .community-app-card__dev-hint .hint-arrow {
+            transform: translateX(3px);
+        }
+
+        /* ホバーでふわっと浮き上がるクリエイター詳細ポップオーバー */
+        .community-app-card__dev-popover {
+            position: absolute;
+            bottom: calc(100% + 12px);
+            left: 0;
+            right: 0;
+            background: rgba(11, 15, 25, 0.98);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(0, 210, 255, 0.35);
+            border-radius: 20px;
+            padding: 1.25rem 1.35rem;
+            box-shadow: 0 24px 55px rgba(0, 0, 0, 0.92), 0 0 32px rgba(0, 210, 255, 0.16);
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            opacity: 0;
+            transform: translateY(10px) scale(0.98);
+            pointer-events: none;
+            visibility: hidden;
+            transition: opacity 0.25s var(--ease), transform 0.25s var(--ease), visibility 0.25s;
+            z-index: 60;
+            will-change: opacity, transform;
+        }
+
+        /* トリガーとの間を埋める不可視のマウスポインタ通過ゾーン */
+        .community-app-card__dev-popover::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            height: 16px;
+        }
+
+        /* ポップオーバー下部のインジケータアロー */
+        .community-app-card__dev-popover-arrow {
+            position: absolute;
+            bottom: -7px;
+            left: 36px;
+            width: 12px;
+            height: 12px;
+            background: rgba(11, 15, 25, 0.98);
+            border-right: 1px solid rgba(0, 210, 255, 0.35);
+            border-bottom: 1px solid rgba(0, 210, 255, 0.35);
+            transform: rotate(45deg);
+        }
+
+        .community-app-card.f2l .community-app-card__dev-popover {
+            border-color: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 24px 55px rgba(0, 0, 0, 0.92), 0 0 32px rgba(168, 85, 247, 0.18);
+        }
+
+        .community-app-card.f2l .community-app-card__dev-popover-arrow {
+            border-right-color: rgba(168, 85, 247, 0.4);
+            border-bottom-color: rgba(168, 85, 247, 0.4);
+        }
+
+        .community-app-card__dev-wrap:hover .community-app-card__dev-popover,
+        .community-app-card__dev-wrap:focus-within .community-app-card__dev-popover {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+            visibility: visible;
+        }
+
+        /* 審査通過アプリ数 & タグライン */
+        .dev-popover__status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        /* 審査通過アプリバッジ */
+        .dev-popover__stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #39ff14;
+            background: rgba(57, 255, 20, 0.12);
+            border: 1px solid rgba(57, 255, 20, 0.35);
+            padding: 0.22rem 0.65rem;
+            border-radius: 999px;
+            letter-spacing: -0.01em;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.15);
+        }
+
+        .dev-popover__stat-badge strong {
+            color: #ffffff;
+            font-weight: 900;
+        }
+
+        .dev-popover__category-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--blue);
+            background: rgba(0, 210, 255, 0.12);
+            border: 1px solid rgba(0, 210, 255, 0.25);
+            padding: 0.18rem 0.55rem;
+            border-radius: 6px;
+        }
+
+        .community-app-card.f2l .dev-popover__category-badge {
+            color: #d8b4fe;
+            background: rgba(168, 85, 247, 0.15);
+            border-color: rgba(168, 85, 247, 0.3);
+        }
+
+        /* 開発者ヘッダー情報 */
+        .dev-popover__header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 0.65rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .dev-popover__avatar-mini {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 900;
+            color: #030712;
+            background: linear-gradient(135deg, #00d2ff, #3b82f6);
+            flex-shrink: 0;
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .community-app-card.f2l .dev-popover__avatar-mini {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: #ffffff;
+        }
+
+        .dev-popover__profile-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0.1rem;
+        }
+
+        .dev-popover__name {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .dev-popover__specialty {
+            font-size: 0.74rem;
+            color: var(--faint);
+        }
+
+        /* 自己紹介文 (bio) */
+        .dev-popover__bio {
+            font-size: 0.83rem;
+            line-height: 1.55;
+            color: rgba(255, 255, 255, 0.84);
+            margin: 0;
+        }
+
+        /* フッター・SNSリンク */
+        .dev-popover__footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-top: 0.45rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        /* SNSリンク (存在感あるボタン) */
+        .sns-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.42rem 0.85rem;
+            border-radius: 999px;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .sns-link-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            border-color: rgba(0, 210, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0, 210, 255, 0.25);
+        }
+
+        .community-app-card.f2l .sns-link-btn:hover {
+            border-color: rgba(168, 85, 247, 0.6);
+            box-shadow: 0 4px 14px rgba(168, 85, 247, 0.3);
+        }
+
+        @media (max-width: 580px) {
+            .community-app-card {
+                padding: 1.3rem;
+            }
+            .community-app-card__dev-trigger {
+                padding: 0.5rem 0.65rem;
+            }
+            .community-app-card__dev-popover {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                right: auto;
+                margin-top: 0.75rem;
+                opacity: 1;
+                transform: none;
+                pointer-events: auto;
+                visibility: visible;
+            }
+            .community-app-card__dev-popover-arrow {
+                display: none;
+            }
+            .community-app-card__dev-hint {
+                display: none;
+            }
         }
 
         /* =========================================
@@ -1279,51 +1498,75 @@
             font-size: clamp(1.8rem, 3.5vw, 2.4rem);
             font-weight: 900;
             color: #fff;
-            margin-bottom: 0.9rem;
+            margin-bottom: 0.8rem;
             line-height: 1.25;
         }
 
         .recruit-body-p {
-            font-size: 0.98rem;
-            line-height: 1.8;
-            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.75);
             margin-bottom: 2rem;
         }
 
-        .recruit-cards-3 {
+        /* 強調する2大メリットカード */
+        .recruit-cards-highlight {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
-            gap: 1.1rem;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+            gap: 1.4rem;
             margin-bottom: 2.2rem;
         }
 
         .recruit-card-item {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 1.1rem;
-            border-radius: var(--radius-md);
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(0, 210, 255, 0.25);
+            padding: 1.4rem 1.5rem;
+            border-radius: 18px;
             display: flex;
-            gap: 0.9rem;
+            gap: 1.1rem;
             align-items: flex-start;
+            transition: all 0.25s var(--ease);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .recruit-card-item:hover {
+            border-color: rgba(0, 210, 255, 0.55);
+            transform: translateY(-3px);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 210, 255, 0.15);
         }
 
         .recruit-card-icon {
-            font-size: 1.7rem;
-            line-height: 1;
             flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(0, 210, 255, 0.12);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--blue);
+        }
+
+        .recruit-card-item:nth-child(2) .recruit-card-icon {
+            background: rgba(255, 215, 0, 0.12);
+            border-color: rgba(255, 215, 0, 0.35);
+            color: var(--gold);
         }
 
         .recruit-card-texts strong {
             display: block;
-            font-size: 0.92rem;
-            color: #fff;
-            margin-bottom: 0.25rem;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 0.35rem;
+            line-height: 1.35;
         }
 
         .recruit-card-texts span {
-            font-size: 0.8rem;
-            color: var(--muted);
-            line-height: 1.45;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.5;
         }
 
         .recruit-action-row {
@@ -1352,7 +1595,7 @@
         }
 
         .recruit-fee-note {
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             color: var(--faint);
         }
 
@@ -1544,7 +1787,7 @@
 
         @media (max-width: 860px) {
             .official-apps-grid { grid-template-columns: 1fr; gap: 1.5rem; }
-            .community-arcade-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+            .community-list-grid { grid-template-columns: 1fr; gap: 1.2rem; }
             
             .modal-window { height: 96vh; }
         }
@@ -1798,123 +2041,230 @@
         </div>
 
         <!-- =========================================
-             セクション 2: コミュニティ製・AI開発Webゲーム (アーケード風)
+             セクション 2: コミュニティ作品 (一覧UI)
              ========================================= -->
         <div id="section-community" class="section-header">
             <div class="section-header__title-wrap">
-                <span class="section-tag-pill section-tag-pill--community">COMMUNITY LAB</span>
-                <h2 class="section-header__title">コミュニティ・AI開発Webアプリ</h2>
+                <span class="section-tag-pill section-tag-pill--community">COMMUNITY</span>
+                <h2 class="section-header__title">コミュニティ作品</h2>
             </div>
-            <span class="section-header__sub">BROWSER ARCADE</span>
         </div>
 
-        <div class="community-arcade-grid">
-            <!-- ゲーム 1: 2面判断スピードトレーナー -->
-            <article class="arcade-card">
-                <!-- アーケード風プレビュースクリーン -->
-                <div class="arcade-screen">
-                    <div class="arcade-screen__bg"></div>
-                    <div class="arcade-screen__vfx-grid"></div>
-                    <span class="arcade-badge-tag">AI PRODUCED</span>
-                    <div class="arcade-screen__center-mock">
-                        <div class="mock-digital-timer">0.428s</div>
-                        <span style="font-size:0.7rem; color:var(--blue); font-family:var(--mono); font-weight:700;">[ T-Perm DETECTED ]</span>
-                    </div>
+        <div class="community-list-grid">
+            <!-- App 1: YUBI GUI 指遣いワークスペース -->
+            <article class="community-app-card">
+                <!-- 1. アプリ名 & アプリの説明 -->
+                <div class="community-app-card__header">
+                    <h3 class="community-app-card__title">YUBI GUI — 指遣いワークスペース</h3>
+                    <p class="community-app-card__desc">
+                        手順から最適な指遣いを解析。WASM探索エンジンと3Dハンドアニメーションで、スムーズなフィンガートリックを直感的に学べるWebツールです。
+                    </p>
                 </div>
 
-                <div class="arcade-content">
-                    <h3 class="arcade-title">2面判断スピードトレーナー</h3>
-                    <p class="arcade-tagline">AIで3日開発！ミリ秒単位で直感認識スピードを鍛えるブラウザタイマー。</p>
+                <!-- 2. サムネイル画像 (下がサムネイル画像) -->
+                <div class="community-app-card__thumb-wrap">
+                    <svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg" aria-label="YUBI GUI 指遣いワークスペース サムネイル">
+                        <defs>
+                            <linearGradient id="thumbBg1" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#0b172a"/>
+                                <stop offset="100%" stop-color="#030712"/>
+                            </linearGradient>
+                            <linearGradient id="cubeGradY" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#00d2ff"/>
+                                <stop offset="100%" stop-color="#3b82f6"/>
+                            </linearGradient>
+                            <linearGradient id="cubeGradB" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#10b981"/>
+                                <stop offset="100%" stop-color="#059669"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- 背景とサイバーグリッド -->
+                        <rect width="280" height="280" fill="url(#thumbBg1)"/>
+                        <path d="M0 70h280M0 140h280M0 210h280M70 0v280M140 0v280M210 0v280" stroke="rgba(0, 210, 255, 0.08)" stroke-width="1.2"/>
+                        <circle cx="140" cy="115" r="85" fill="none" stroke="rgba(0, 210, 255, 0.12)" stroke-dasharray="4 4"/>
+                        <!-- 3D キューブと指遣いレーン -->
+                        <g transform="translate(140, 110)">
+                            <!-- 上面 -->
+                            <polygon points="0,-52 56,-24 0,4 -56,-24" fill="url(#cubeGradY)" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+                            <!-- 右面 -->
+                            <polygon points="0,4 56,-24 56,36 0,64" fill="url(#cubeGradB)" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+                            <!-- 左面 -->
+                            <polygon points="-56,-24 0,4 0,64 -56,36" fill="#0f172a" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+                            <!-- フィンガー軌跡アロー -->
+                            <path d="M-40,10 Q0,-30 40,20" fill="none" stroke="#38bdf8" stroke-width="3" stroke-dasharray="5 3"/>
+                            <polygon points="40,20 32,12 38,8" fill="#38bdf8"/>
+                        </g>
+                        <!-- HUDディスプレイバッジ -->
+                        <rect x="35" y="206" width="210" height="46" rx="12" fill="#030712" stroke="#00d2ff" stroke-width="1.5"/>
+                        <text x="140" y="231" fill="#00d2ff" font-size="16" font-weight="900" font-family="monospace" text-anchor="middle" letter-spacing="2">YUBI GUI 3D</text>
+                        <text x="140" y="244" fill="rgba(255,255,255,0.7)" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">FINGER TRICK WORKSPACE</text>
+                    </svg>
+                </div>
 
-                    <ul class="arcade-tags">
-                        <li class="arcade-tag-item">#Cursor開発</li>
-                        <li class="arcade-tag-item">#Claude3.7</li>
-                        <li class="arcade-tag-item">#Vercel配信</li>
-                        <li class="arcade-tag-item">#Webタイマー</li>
-                    </ul>
+                <!-- 3. アクション: ブラウザで遊ぶ ▷ -->
+                <div class="community-app-card__action">
+                    <button type="button" class="community-app-card__play-btn" onclick="openAppModal('app-yubi')">
+                        <span>ブラウザで遊ぶ</span>
+                        <span>▷</span>
+                    </button>
+                </div>
 
-                    <!-- Discord風クリエイターカード -->
-                    <div class="creator-discord-card">
-                        <div class="creator-discord-top">
-                            <div class="creator-id-group">
-                                <div class="creator-avatar-ring">TK</div>
-                                <div class="creator-name-meta">
-                                    <span class="creator-handle-name">Takumi</span>
-                                    <span class="creator-role-tag">視聴者クリエイター</span>
-                                </div>
+                <!-- 4. 開発者情報 (通常は大きめのアイコンと名前のみ / ホバーで詳細と審査通過アプリ数を表示) -->
+                <div class="community-app-card__dev-wrap" tabindex="0" role="region" aria-label="開発者情報: YUBI Project">
+                    <div class="community-app-card__dev-trigger">
+                        <div class="community-app-card__dev-main">
+                            <span class="community-app-card__dev-avatar">YG</span>
+                            <div class="community-app-card__dev-title-box">
+                                <span class="community-app-card__dev-role-label">DEVELOPER</span>
+                                <strong class="community-app-card__dev-name">YUBI Project</strong>
                             </div>
-                            <a href="https://x.com/" target="_blank" rel="noopener noreferrer" class="creator-x-btn">
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block; vertical-align:middle;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                                <span>@takumi ↗</span>
-                            </a>
                         </div>
-                        <div class="creator-quote-box">
-                            “CursorとClaudeを使って3日で作成しました！スマホのブラウザでもサクサク動いて、2側面判断の反射速度を測れます。”
-                        </div>
+                        <span class="community-app-card__dev-hint">
+                            <span>プロフィール</span>
+                            <span class="hint-arrow">›</span>
+                        </span>
                     </div>
 
-                    <button type="button" class="btn-launch-game" onclick="openAppModal('app-2side')">
-                        <span>ブラウザで今すぐ遊ぶ</span>
-                        <span style="font-size:1.15rem;">▷</span>
-                    </button>
+                    <!-- ホバーでふわっと浮き上がるクリエイター詳細ポップオーバー -->
+                    <div class="community-app-card__dev-popover" role="tooltip">
+                        <div class="community-app-card__dev-popover-arrow"></div>
+                        
+                        <!-- 審査通過アプリ数 & カテゴリ -->
+                        <div class="dev-popover__status-row">
+                            <div class="dev-popover__stat-badge">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                <span>審査通過アプリ: <strong>1作品</strong></span>
+                            </div>
+                            <span class="dev-popover__category-badge">Webツール</span>
+                        </div>
+
+                        <!-- 開発者ヘッダー情報 -->
+                        <div class="dev-popover__header">
+                            <div class="dev-popover__avatar-mini">YG</div>
+                            <div class="dev-popover__profile-text">
+                                <strong class="dev-popover__name">YUBI Project</strong>
+                                <span class="dev-popover__specialty">WASM / Three.js 3D</span>
+                            </div>
+                        </div>
+
+                        <!-- 自己紹介文 -->
+                        <p class="dev-popover__bio">
+                            手順の最適な指遣い・フィンガートリックを3DアニメーションとWASMで可視化する研究ツール。
+                        </p>
+
+                        <!-- 公式リンク / SNS -->
+                        <div class="dev-popover__footer">
+                            <a href="https://yubi-gui.vercel.app/" target="_blank" rel="noopener noreferrer" class="sns-link-btn" title="YUBI GUI 公式サイト">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                                <span>vercel.app ↗</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </article>
 
-            <!-- ゲーム 2: F2L スロット直感シミュレータ -->
-            <article class="arcade-card f2l">
-                <!-- アーケード風プレビュースクリーン -->
-                <div class="arcade-screen f2l">
-                    <div class="arcade-screen__bg"></div>
-                    <div class="arcade-screen__vfx-grid"></div>
-                    <span class="arcade-badge-tag">3D WEBGL</span>
-                    <div class="arcade-screen__center-mock">
-                        <div class="mock-3d-cube">
-                            <svg width="44" height="44" viewBox="0 0 48 48" fill="none" style="display:block; margin:0 auto;">
-                                <path d="M24 4L42 14V34L24 44L6 34V14L24 4Z" stroke="#ec4899" stroke-width="1.5"/>
-                                <path d="M24 4L42 14L24 24L6 14L24 4Z" fill="#a855f7" fill-opacity="0.6"/>
-                                <path d="M6 14L24 24V44L6 34V14Z" fill="#7c3aed" fill-opacity="0.8"/>
-                                <path d="M42 14L24 24V44L42 34V14Z" fill="#db2777" fill-opacity="0.7"/>
-                            </svg>
-                        </div>
-                        <span style="font-size:0.7rem; color:#ec4899; font-family:var(--mono); font-weight:700;">[ F2L SLOT SIMULATOR ]</span>
-                    </div>
+            <!-- App 2: F2L スロット直感シミュレータ -->
+            <article class="community-app-card f2l">
+                <!-- 1. アプリ名 & アプリの説明 -->
+                <div class="community-app-card__header">
+                    <h3 class="community-app-card__title">F2L スロット直感シミュレータ</h3>
+                    <p class="community-app-card__desc">
+                        死角になりやすい背面・裏スロットのペアイン軌道を3Dモデルで直感的に可視化。持ち替えを減らし、先読み（ルックアヘッド）スピードを鍛える特訓ツールです。
+                    </p>
                 </div>
 
-                <div class="arcade-content">
-                    <h3 class="arcade-title">F2L スロット直感シミュレータ</h3>
-                    <p class="arcade-tagline">Three.js活用！裏スロット挿入の死角を3D空間で直感可視化する学習ツール。</p>
+                <!-- 2. サムネイル画像 (下がサムネイル画像) -->
+                <div class="community-app-card__thumb-wrap">
+                    <svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg" aria-label="F2L スロット直感シミュレータ サムネイル">
+                        <defs>
+                            <linearGradient id="thumbBg2" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#1b0b2e"/>
+                                <stop offset="100%" stop-color="#070210"/>
+                            </linearGradient>
+                            <linearGradient id="slotGrad" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#f43f5e"/>
+                                <stop offset="100%" stop-color="#a855f7"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- 背景とサイバーグリッド -->
+                        <rect width="280" height="280" fill="url(#thumbBg2)"/>
+                        <path d="M0 70h280M0 140h280M0 210h280M70 0v280M140 0v280M210 0v280" stroke="rgba(168, 85, 247, 0.08)" stroke-width="1.2"/>
+                        <circle cx="140" cy="120" r="85" fill="none" stroke="rgba(168, 85, 247, 0.15)" stroke-dasharray="4 4"/>
+                        <!-- 3D F2L スロットキューブ -->
+                        <g transform="translate(140, 115)">
+                            <polygon points="0,-56 56,-26 0,4 -56,-26" fill="none" stroke="#ec4899" stroke-width="2.5"/>
+                            <polygon points="0,4 56,-26 56,38 0,68" fill="url(#slotGrad)" fill-opacity="0.8" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+                            <polygon points="-56,-26 0,4 0,68 -56,38" fill="#3b0764" fill-opacity="0.85" stroke="#a855f7" stroke-width="2" stroke-linejoin="round"/>
+                            <!-- 挿入軌跡アロー -->
+                            <path d="M-35,-45 Q0,-72 42,-40" fill="none" stroke="#ff0077" stroke-width="3.5" stroke-linecap="round"/>
+                            <polygon points="42,-40 30,-50 39,-56" fill="#ff0077"/>
+                        </g>
+                        <!-- HUDディスプレイバッジ -->
+                        <rect x="50" y="208" width="180" height="42" rx="10" fill="#030712" stroke="#a855f7" stroke-width="1.5"/>
+                        <text x="140" y="234" fill="#c084fc" font-size="18" font-weight="900" font-family="monospace" text-anchor="middle" letter-spacing="2">F2L 3D WEB</text>
+                        <text x="140" y="246" fill="rgba(255,255,255,0.6)" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">SLOT INTUITION SIMULATOR</text>
+                    </svg>
+                </div>
 
-                    <ul class="arcade-tags">
-                        <li class="arcade-tag-item">#Three.js</li>
-                        <li class="arcade-tag-item">#WebGL3D</li>
-                        <li class="arcade-tag-item">#GitHubPages</li>
-                        <li class="arcade-tag-item">#個人開発</li>
-                    </ul>
+                <!-- 3. アクション: ブラウザで遊ぶ ▷ -->
+                <div class="community-app-card__action">
+                    <button type="button" class="community-app-card__play-btn" onclick="openAppModal('app-f2l')">
+                        <span>ブラウザで遊ぶ</span>
+                        <span>▷</span>
+                    </button>
+                </div>
 
-                    <!-- Discord風クリエイターカード -->
-                    <div class="creator-discord-card">
-                        <div class="creator-discord-top">
-                            <div class="creator-id-group">
-                                <div class="creator-avatar-ring">SR</div>
-                                <div class="creator-name-meta">
-                                    <span class="creator-handle-name">Sora</span>
-                                    <span class="creator-role-tag">Web3Dエンジニア</span>
-                                </div>
+                <!-- 4. 開発者情報 (通常は大きめのアイコンと名前のみ / ホバーで詳細と審査通過アプリ数を表示) -->
+                <div class="community-app-card__dev-wrap" tabindex="0" role="region" aria-label="開発者情報: Sora">
+                    <div class="community-app-card__dev-trigger">
+                        <div class="community-app-card__dev-main">
+                            <span class="community-app-card__dev-avatar">SR</span>
+                            <div class="community-app-card__dev-title-box">
+                                <span class="community-app-card__dev-role-label">DEVELOPER</span>
+                                <strong class="community-app-card__dev-name">Sora</strong>
                             </div>
-                            <a href="https://x.com/" target="_blank" rel="noopener noreferrer" class="creator-x-btn">
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block; vertical-align:middle;"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </div>
+                        <span class="community-app-card__dev-hint">
+                            <span>プロフィール</span>
+                            <span class="hint-arrow">›</span>
+                        </span>
+                    </div>
+
+                    <!-- ホバーでふわっと浮き上がるクリエイター詳細ポップオーバー -->
+                    <div class="community-app-card__dev-popover" role="tooltip">
+                        <div class="community-app-card__dev-popover-arrow"></div>
+                        
+                        <!-- 審査通過アプリ数 & カテゴリ -->
+                        <div class="dev-popover__status-row">
+                            <div class="dev-popover__stat-badge">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                <span>審査通過アプリ: <strong>1作品</strong></span>
+                            </div>
+                            <span class="dev-popover__category-badge">Web3Dエンジニア</span>
+                        </div>
+
+                        <!-- 開発者ヘッダー情報 -->
+                        <div class="dev-popover__header">
+                            <div class="dev-popover__avatar-mini">SR</div>
+                            <div class="dev-popover__profile-text">
+                                <strong class="dev-popover__name">Sora</strong>
+                                <span class="dev-popover__specialty">WebGL / Three.js</span>
+                            </div>
+                        </div>
+
+                        <!-- 自己紹介文 -->
+                        <p class="dev-popover__bio">
+                            競技パズルとWebGLが好き。裏スロットの立体死角を可視化します。
+                        </p>
+
+                        <!-- 公式リンク / SNS -->
+                        <div class="dev-popover__footer">
+                            <a href="https://x.com/" target="_blank" rel="noopener noreferrer" class="sns-link-btn" title="SoraのX (Twitter) プロフィール">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                                 <span>@sora_3d ↗</span>
                             </a>
                         </div>
-                        <div class="creator-quote-box">
-                            “裏スロット挿入の死角を3Dで可視化するツールです。GACHI CUBEの数理美学に影響を受けて開発しました！”
-                        </div>
                     </div>
-
-                    <button type="button" class="btn-launch-game" onclick="openAppModal('app-f2l')">
-                        <span>ブラウザで今すぐ遊ぶ</span>
-                        <span style="font-size:1.15rem;">▷</span>
-                    </button>
                 </div>
             </article>
         </div>
@@ -1924,48 +2274,34 @@
             <div class="recruit-glow-circle"></div>
             <div class="recruit-inner">
                 <span class="recruit-badge">CREATORS WANTED</span>
-                <h2 class="recruit-h2">あなたの作ったパズルWebアプリ・ゲームを掲載しませんか？</h2>
+                <h2 class="recruit-h2">あなたの作ったパズルWebアプリを掲載しませんか？</h2>
                 <p class="recruit-body-p">
-                    CursorやChatGPT、Claudeなどの生成AIを使って個人開発したツール・ゲームを大募集。
-                    ソースコードの提出は不要！ VercelやGitHub Pages等の公開URLをお知らせいただくだけで、GACHI CUBEの独自ドメイン内で安全に埋め込み公開します。
+                    個人開発のWebツールやパズルゲームを大募集。公開URLをお知らせいただくだけで、気軽にご応募いただけます。
                 </p>
 
-                <div class="recruit-cards-3">
+                <div class="recruit-cards-highlight">
                     <div class="recruit-card-item">
                         <div class="recruit-card-icon">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                             </svg>
                         </div>
                         <div class="recruit-card-texts">
-                            <strong>公式YouTube & Xで紹介</strong>
-                            <span>登録者3,900人超の知的好奇心旺盛なファン層へあなたの作品をお届け</span>
+                            <strong>審査に通過したアプリは公式Xで紹介</strong>
+                            <span>GACHI CUBE公式Xであなたの作品をピックアップ！多くのパズルファンへ作品をお届けします。</span>
                         </div>
                     </div>
+
                     <div class="recruit-card-item">
                         <div class="recruit-card-icon">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
                             </svg>
                         </div>
                         <div class="recruit-card-texts">
-                            <strong>ソースコード管理ゼロ</strong>
-                            <span>URL連携のみ。自社サーバーデプロイ不要で安全に配信</span>
-                        </div>
-                    </div>
-                    <div class="recruit-card-item">
-                        <div class="recruit-card-icon">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                <polyline points="15 3 21 3 21 9"></polyline>
-                                <line x1="10" y1="14" x2="21" y2="3"></line>
-                            </svg>
-                        </div>
-                        <div class="recruit-card-texts">
-                            <strong>作者クレジット完全表記</strong>
-                            <span>XアカウントやGitHubへのリンクを全面バックアップ</span>
+                            <strong>作者情報完全表記、もちろん匿名でもOK</strong>
+                            <span>Xアカウントやプロフィールをしっかり掲載。匿名やペンネームでの掲載も大歓迎です。</span>
                         </div>
                     </div>
                 </div>
@@ -2013,8 +2349,8 @@
                     id="modal-iframe"
                     class="modal-frame"
                     title="Community App"
-                    sandbox="allow-scripts allow-forms allow-popups allow-modals"
-                    allow="fullscreen"
+                    sandbox="allow-scripts allow-forms allow-popups allow-modals allow-same-origin"
+                    allow="fullscreen; clipboard-read; clipboard-write"
                 ></iframe>
             </div>
 
@@ -2035,14 +2371,21 @@
     </footer>
 
     <script>
-        // コミュニティアプリのデモデータ
+        // コミュニティアプリのデータ
         const APPS_DATA = {
+            'app-yubi': {
+                name: 'YUBI GUI — 指遣いワークスペース',
+                creator: 'YUBI Project',
+                comment: '「手順の最適なフィンガートリックをWASM探索エンジンと3Dで可視化するWebツールです」',
+                url: 'https://yubi-gui.vercel.app/',
+                useUrl: true
+            },
             'app-2side': {
-                name: '2面判断スピードトレーナー',
-                creator: 'Takumi (@takumi_speedcube)',
-                comment: '「CursorとClaudeを使って3日で作成しました！スマホのブラウザでもサクサク動きます」',
-                url: 'https://cube-trainer-demo.vercel.app/',
-                doc: `<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><style>body{margin:0;padding:2rem;background:#0c0d14;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;}.card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:18px;padding:2rem;max-width:440px;width:100%;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.6);}.badge{display:inline-block;padding:0.25rem 0.65rem;border-radius:20px;background:rgba(0,210,255,0.2);color:#00d2ff;font-size:0.75rem;font-weight:bold;margin-bottom:0.8rem;}h1{font-size:1.35rem;margin:0 0 0.8rem;}.screen{font-size:2.8rem;font-weight:900;font-family:monospace;padding:1.2rem;background:#000;border-radius:12px;margin:1.2rem 0;color:#00d2ff;border:1px solid rgba(0,210,255,0.3);}.btn-row{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;}button{padding:0.75rem 1.3rem;border-radius:10px;border:none;font-weight:bold;cursor:pointer;font-size:0.9rem;}.btn-start{background:#00d2ff;color:#000;}.btn-ans{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);}.btn-ans:hover{background:rgba(255,255,255,0.2);}.log{margin-top:1rem;font-size:0.82rem;color:#888;}</style></head><body><div class="card"><div class="badge">SANDBOX DEMO</div><h1>2面判断 反射速度測定</h1><p style="font-size:0.85rem;color:#aaa;">表示されるパターンを瞬時に見抜いて押せ！</p><div id="target" class="screen">READY</div><div class="btn-row" id="actions"><button class="btn-start" onclick="startGame()">▶ スタート</button></div><div class="log" id="log">安全な隔離環境で動作中</div></div><script>let start=0;const cases=['T-Perm','Ua-Perm','Ub-Perm','Jb-Perm','Y-Perm'];let cur='';function startGame(){document.getElementById('target').innerText='READY...';document.getElementById('target').style.color='#ffd700';document.getElementById('actions').innerHTML='<span style="color:#aaa;">集中してください...</span>';setTimeout(()=>{cur=cases[Math.floor(Math.random()*cases.length)];document.getElementById('target').innerText=cur;document.getElementById('target').style.color='#00d2ff';start=performance.now();renderButtons();},1000+Math.random()*1500);}function renderButtons(){let h='';cases.forEach(c=>{h+='<button class="btn-ans" onclick="checkAns(\\''+c+'\\')">'+c+'</button>';});document.getElementById('actions').innerHTML=h;}function checkAns(c){const el=Math.round(performance.now()-start);if(c===cur){document.getElementById('target').innerText=el+' ms!';document.getElementById('target').style.color='#39ff14';document.getElementById('log').innerText='正解！ 反射速度: '+el+'ms';}else{document.getElementById('target').innerText='MISS!';document.getElementById('target').style.color='#ff4444';document.getElementById('log').innerText='不正解 (正解: '+cur+')';}document.getElementById('actions').innerHTML='<button class="btn-start" onclick="startGame()">もう一度挑戦</button>';}<\/script></body></html>`
+                name: 'YUBI GUI — 指遣いワークスペース',
+                creator: 'YUBI Project',
+                comment: '「手順の最適なフィンガートリックをWASM探索エンジンと3Dで可視化するWebツールです」',
+                url: 'https://yubi-gui.vercel.app/',
+                useUrl: true
             },
             'app-f2l': {
                 name: 'F2L スロット直感シミュレータ',
@@ -2063,7 +2406,13 @@
             document.getElementById('modal-ext-link').href = data.url;
 
             const iframe = document.getElementById('modal-iframe');
-            iframe.srcdoc = data.doc;
+            if (data.useUrl) {
+                iframe.removeAttribute('srcdoc');
+                iframe.src = data.url;
+            } else if (data.doc) {
+                iframe.removeAttribute('src');
+                iframe.srcdoc = data.doc;
+            }
 
             const modal = document.getElementById('player-modal');
             modal.classList.add('is-open');
@@ -2074,14 +2423,22 @@
             const modal = document.getElementById('player-modal');
             modal.classList.remove('is-open');
             document.body.style.overflow = '';
-            document.getElementById('modal-iframe').srcdoc = '';
+            const iframe = document.getElementById('modal-iframe');
+            iframe.removeAttribute('srcdoc');
+            iframe.src = 'about:blank';
         }
 
         function reloadModalIframe() {
             const iframe = document.getElementById('modal-iframe');
-            const doc = iframe.srcdoc;
-            iframe.srcdoc = '';
-            setTimeout(() => { iframe.srcdoc = doc; }, 100);
+            if (iframe.src && iframe.src !== 'about:blank') {
+                const currentSrc = iframe.src;
+                iframe.src = 'about:blank';
+                setTimeout(() => { iframe.src = currentSrc; }, 100);
+            } else if (iframe.srcdoc) {
+                const currentDoc = iframe.srcdoc;
+                iframe.srcdoc = '';
+                setTimeout(() => { iframe.srcdoc = currentDoc; }, 100);
+            }
         }
 
         // ESCキーでモーダルを閉じる
