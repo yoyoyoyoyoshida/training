@@ -1132,7 +1132,7 @@
             margin-bottom: 2.8rem;
             scrollbar-width: thin;
             scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
-            scroll-behavior: smooth;
+            scroll-behavior: auto;
             -webkit-overflow-scrolling: touch;
             cursor: grab;
             user-select: none;
@@ -1195,21 +1195,25 @@
             transition: transform 0.3s var(--ease), border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
             position: relative;
             overflow: visible;
+            cursor: pointer;
+            outline: none;
         }
 
-        .community-app-card:hover {
+        .community-app-card:hover,
+        .community-app-card:focus-visible {
             transform: translateY(-6px);
-            border-color: rgba(0, 0, 0, 0.14);
-            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+            border-color: rgba(2, 132, 199, 0.35);
+            box-shadow: 0 20px 45px rgba(2, 132, 199, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
         }
 
         .community-app-card.f2l {
             border-color: rgba(0, 0, 0, 0.07);
         }
 
-        .community-app-card.f2l:hover {
-            border-color: rgba(0, 0, 0, 0.14);
-            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+        .community-app-card.f2l:hover,
+        .community-app-card.f2l:focus-visible {
+            border-color: rgba(168, 85, 247, 0.35);
+            box-shadow: 0 20px 45px rgba(168, 85, 247, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
         }
 
         /* カルーセル末尾: すべての作品を見るカード */
@@ -1251,9 +1255,28 @@
         }
 
         .community-app-card--more:hover .card-more-icon-wrap {
-            transform: scale(1.1) rotate(4deg);
+            transform: scale(1.12) rotate(90deg);
             background: #0284c7;
             color: #ffffff;
+        }
+
+        .card-more-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.22rem 0.65rem;
+            border-radius: 999px;
+            background: rgba(2, 132, 199, 0.08);
+            border: 1px solid rgba(2, 132, 199, 0.2);
+            color: #0284c7;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+
+        .community-app-card--more:hover .card-more-badge {
+            background: rgba(2, 132, 199, 0.14);
+            border-color: rgba(2, 132, 199, 0.35);
         }
 
         .card-more-title {
@@ -1290,13 +1313,17 @@
             background: #0284c7;
         }
 
-        /* 1. アプリ名 & 説明 */
+        /* 1. アプリ名 & 説明 (文章量によらずサムネイルと開発者プロフィールの位置を均一に保つ設計) */
         .community-app-card__header {
             margin-bottom: 1.1rem;
             text-align: center;
             display: flex;
             flex-direction: column;
+            justify-content: flex-start;
             gap: 0.5rem;
+            height: 9.65rem;
+            min-height: 9.65rem;
+            flex-shrink: 0;
         }
 
         .community-app-card__title {
@@ -1307,6 +1334,14 @@
             letter-spacing: -0.01em;
             line-height: 1.35;
             text-shadow: none;
+            /* 2行分の高さを常に確保し、1行・2行問わずサムネイルの開始高さを同一化 */
+            height: 3.65rem;
+            min-height: 3.65rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
         }
 
         .community-app-card__desc {
@@ -1315,6 +1350,14 @@
             color: #64748b;
             margin: 0;
             padding: 0 0.3rem;
+            /* 4行分の高さを常に固定確保し、文章量によるサムネイルのズレを解消 */
+            height: 5.5rem;
+            min-height: 5.5rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* 2. 正方形サムネイル画像 (アプリ名の下・大迫力 1:1) */
@@ -1330,13 +1373,53 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 1.2rem;
-            transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+            margin-bottom: 1.35rem;
+            flex-shrink: 0;
+            transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease), border-color 0.3s var(--ease);
+        }
+
+        /* サムネイル右下の「▷ 遊ぶ」クイックプレイバッジ (ボタンを無くしスッキリ直感化) */
+        .community-app-card__thumb-wrap::after {
+            content: '▷ 遊ぶ';
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: #ffffff;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            padding: 0.38rem 0.82rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+            transition: all 0.25s var(--ease);
+            pointer-events: none;
         }
 
         .community-app-card:hover .community-app-card__thumb-wrap {
             transform: scale(1.02);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.15);
+            border-color: rgba(2, 132, 199, 0.35);
+        }
+
+        .community-app-card:hover .community-app-card__thumb-wrap::after {
+            background: #0284c7;
+            border-color: #38bdf8;
+            transform: scale(1.05);
+            box-shadow: 0 6px 18px rgba(2, 132, 199, 0.45);
+        }
+
+        .community-app-card.f2l:hover .community-app-card__thumb-wrap {
+            border-color: rgba(168, 85, 247, 0.35);
+        }
+
+        .community-app-card.f2l:hover .community-app-card__thumb-wrap::after {
+            background: #a855f7;
+            border-color: #c084fc;
+            box-shadow: 0 6px 18px rgba(168, 85, 247, 0.45);
         }
 
         .community-app-card__thumb-wrap svg {
@@ -1345,60 +1428,15 @@
             display: block;
         }
 
-        /* 3. プレイアクションボタン (シンプル＆上質なダークスレートスタイル) */
-        .community-app-card__action {
-            margin-bottom: 1.15rem;
-        }
-
-        .community-app-card__play-btn {
-            width: 100%;
-            padding: 0.82rem 1.3rem;
-            background: #1e293b;
-            border: 1px solid #1e293b;
-            border-radius: 12px;
-            color: #ffffff;
-            font-weight: 700;
-            font-size: 0.94rem;
-            letter-spacing: 0.04em;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.55rem;
-            transition: all 0.22s var(--ease);
-            box-shadow: 0 2px 8px rgba(30, 41, 59, 0.12);
-        }
-
-        .community-app-card__play-btn .play-icon {
-            font-size: 0.8rem;
-            opacity: 0.85;
-            transition: transform 0.2s ease;
-        }
-
-        .community-app-card__play-btn:hover {
-            background: #0f172a;
-            border-color: #0f172a;
-            color: #ffffff;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.22);
-        }
-
-        .community-app-card__play-btn:hover .play-icon {
-            transform: translateX(3px);
-            opacity: 1;
-        }
-
-        .community-app-card__play-btn:active {
-            transform: translateY(0);
-        }
-
-        /* 4. 開発者情報 (通常は大きめのアイコンと名前のみ / ホバーで詳細と審査通過アプリ数を表示) */
+        /* 3. 開発者情報 (通常は大きめのアイコンと名前のみ / ホバーで詳細と審査通過アプリ数を表示) */
         .community-app-card__dev-wrap {
             position: relative;
             margin-top: auto;
             padding-top: 1.1rem;
             border-top: 1px solid rgba(0, 0, 0, 0.07);
             outline: none;
+            flex-shrink: 0;
+            cursor: default;
         }
 
         .community-app-card__dev-trigger {
@@ -1472,11 +1510,23 @@
         }
 
         .community-app-card__dev-role-label {
-            font-family: var(--mono);
-            font-size: 0.62rem;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.72rem;
             font-weight: 700;
-            letter-spacing: 0.1em;
-            color: #64748b;
+            letter-spacing: 0.04em;
+            color: #475569;
+            background: rgba(100, 116, 139, 0.09);
+            padding: 0.16rem 0.48rem;
+            border-radius: 6px;
+            width: fit-content;
+        }
+
+        .community-app-card.f2l .community-app-card__dev-role-label {
+            color: #7c3aed;
+            background: rgba(168, 85, 247, 0.1);
         }
 
         /* 開発者名 */
@@ -2831,7 +2881,7 @@
                 <!-- Group 1 -->
                 <div class="community-marquee-group">
                     <!-- App 1: YUBI GUI 指遣いワークスペース -->
-                    <article class="community-app-card">
+                    <article class="community-app-card" onclick="handleCardPlayClick('app-yubi', event)" data-app-id="app-yubi" role="button" tabindex="0" aria-label="YUBI GUI — 指遣いワークスペースをプレイ">
                         <!-- 1. アプリ名 & アプリの説明 -->
                         <div class="community-app-card__header">
                             <h3 class="community-app-card__title">YUBI GUI — 指遣いワークスペース</h3>
@@ -2840,7 +2890,7 @@
                             </p>
                         </div>
 
-                        <!-- 2. サムネイル画像 -->
+                        <!-- 2. サムネイル画像 (クリックですぐに遊べる) -->
                         <div class="community-app-card__thumb-wrap">
                             <svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg" aria-label="YUBI GUI 指遣いワークスペース サムネイル">
                                 <defs>
@@ -2873,21 +2923,13 @@
                             </svg>
                         </div>
 
-                        <!-- 3. アクション: 遊ぶ ▷ -->
-                        <div class="community-app-card__action">
-                            <button type="button" class="community-app-card__play-btn" onclick="openAppModal('app-yubi')">
-                                <span>遊ぶ</span>
-                                <span class="play-icon">▷</span>
-                            </button>
-                        </div>
-
-                        <!-- 4. 開発者情報 -->
-                        <div class="community-app-card__dev-wrap" tabindex="0" role="region" aria-label="開発者情報: YUBI Project">
+                        <!-- 3. 開発者情報 -->
+                        <div class="community-app-card__dev-wrap" onclick="event.stopPropagation()" tabindex="0" role="region" aria-label="開発者情報: YUBI Project">
                             <div class="community-app-card__dev-trigger">
                                 <div class="community-app-card__dev-main">
                                     <span class="community-app-card__dev-avatar">YG</span>
                                     <div class="community-app-card__dev-title-box">
-                                        <span class="community-app-card__dev-role-label">DEVELOPER</span>
+                                        <span class="community-app-card__dev-role-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>開発者</span>
                                         <strong class="community-app-card__dev-name">YUBI Project</strong>
                                     </div>
                                 </div>
@@ -2921,7 +2963,7 @@
                     </article>
 
                     <!-- App 2: F2L スロット直感シミュレータ -->
-                    <article class="community-app-card f2l">
+                    <article class="community-app-card f2l" onclick="handleCardPlayClick('app-f2l', event)" data-app-id="app-f2l" role="button" tabindex="0" aria-label="F2L スロット直感シミュレータをプレイ">
                         <!-- 1. アプリ名 & アプリの説明 -->
                         <div class="community-app-card__header">
                             <h3 class="community-app-card__title">F2L スロット直感シミュレータ</h3>
@@ -2930,7 +2972,7 @@
                             </p>
                         </div>
 
-                        <!-- 2. サムネイル画像 -->
+                        <!-- 2. サムネイル画像 (クリックですぐに遊べる) -->
                         <div class="community-app-card__thumb-wrap">
                             <svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg" aria-label="F2L スロット直感シミュレータ サムネイル">
                                 <defs>
@@ -2959,21 +3001,13 @@
                             </svg>
                         </div>
 
-                        <!-- 3. アクション: 遊ぶ ▷ -->
-                        <div class="community-app-card__action">
-                            <button type="button" class="community-app-card__play-btn" onclick="openAppModal('app-f2l')">
-                                <span>遊ぶ</span>
-                                <span class="play-icon">▷</span>
-                            </button>
-                        </div>
-
-                        <!-- 4. 開発者情報 -->
-                        <div class="community-app-card__dev-wrap" tabindex="0" role="region" aria-label="開発者情報: Sora">
+                        <!-- 3. 開発者情報 -->
+                        <div class="community-app-card__dev-wrap" onclick="event.stopPropagation()" tabindex="0" role="region" aria-label="開発者情報: Sora">
                             <div class="community-app-card__dev-trigger">
                                 <div class="community-app-card__dev-main">
                                     <span class="community-app-card__dev-avatar">SR</span>
                                     <div class="community-app-card__dev-title-box">
-                                        <span class="community-app-card__dev-role-label">DEVELOPER</span>
+                                        <span class="community-app-card__dev-role-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>開発者</span>
                                         <strong class="community-app-card__dev-name">Sora</strong>
                                     </div>
                                 </div>
@@ -3007,7 +3041,7 @@
                     </article>
 
                     <!-- App 1 リピート (滑らかな無限トラック用) -->
-                    <article class="community-app-card">
+                    <article class="community-app-card" onclick="handleCardPlayClick('app-yubi', event)" data-app-id="app-yubi" role="button" tabindex="0" aria-label="YUBI GUI — 指遣いワークスペースをプレイ">
                         <div class="community-app-card__header">
                             <h3 class="community-app-card__title">YUBI GUI — 指遣いワークスペース</h3>
                             <p class="community-app-card__desc">
@@ -3031,18 +3065,12 @@
                                 <text x="140" y="244" fill="rgba(255,255,255,0.7)" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">FINGER TRICK WORKSPACE</text>
                             </svg>
                         </div>
-                        <div class="community-app-card__action">
-                            <button type="button" class="community-app-card__play-btn" onclick="openAppModal('app-yubi')">
-                                <span>遊ぶ</span>
-                                <span class="play-icon">▷</span>
-                            </button>
-                        </div>
-                        <div class="community-app-card__dev-wrap" tabindex="0" role="region" aria-label="開発者情報: YUBI Project">
+                        <div class="community-app-card__dev-wrap" onclick="event.stopPropagation()" tabindex="0" role="region" aria-label="開発者情報: YUBI Project">
                             <div class="community-app-card__dev-trigger">
                                 <div class="community-app-card__dev-main">
                                     <span class="community-app-card__dev-avatar">YG</span>
                                     <div class="community-app-card__dev-title-box">
-                                        <span class="community-app-card__dev-role-label">DEVELOPER</span>
+                                        <span class="community-app-card__dev-role-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>開発者</span>
                                         <strong class="community-app-card__dev-name">YUBI Project</strong>
                                     </div>
                                 </div>
@@ -3074,7 +3102,7 @@
                     </article>
 
                     <!-- App 2 リピート (滑らかな無限トラック用) -->
-                    <article class="community-app-card f2l">
+                    <article class="community-app-card f2l" onclick="handleCardPlayClick('app-f2l', event)" data-app-id="app-f2l" role="button" tabindex="0" aria-label="F2L スロット直感シミュレータをプレイ">
                         <div class="community-app-card__header">
                             <h3 class="community-app-card__title">F2L スロット直感シミュレータ</h3>
                             <p class="community-app-card__desc">
@@ -3098,18 +3126,12 @@
                                 <text x="140" y="246" fill="rgba(255,255,255,0.6)" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">SLOT INTUITION SIMULATOR</text>
                             </svg>
                         </div>
-                        <div class="community-app-card__action">
-                            <button type="button" class="community-app-card__play-btn" onclick="openAppModal('app-f2l')">
-                                <span>遊ぶ</span>
-                                <span class="play-icon">▷</span>
-                            </button>
-                        </div>
-                        <div class="community-app-card__dev-wrap" tabindex="0" role="region" aria-label="開発者情報: Sora">
+                        <div class="community-app-card__dev-wrap" onclick="event.stopPropagation()" tabindex="0" role="region" aria-label="開発者情報: Sora">
                             <div class="community-app-card__dev-trigger">
                                 <div class="community-app-card__dev-main">
                                     <span class="community-app-card__dev-avatar">SR</span>
                                     <div class="community-app-card__dev-title-box">
-                                        <span class="community-app-card__dev-role-label">DEVELOPER</span>
+                                        <span class="community-app-card__dev-role-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>開発者</span>
                                         <strong class="community-app-card__dev-name">Sora</strong>
                                     </div>
                                 </div>
@@ -3139,12 +3161,32 @@
                             </div>
                         </div>
                     </article>
+
+                    <!-- カルーセル末尾: 自分の作品を提出する（問い合わせページへの誘導カード） -->
+                    <article class="community-app-card--more" onclick="handleCardSubmitClick(event)" role="button" tabindex="0" aria-label="自分の作品を提出する（問い合わせページを開く）">
+                        <div class="card-more-icon-wrap" aria-hidden="true">
+                            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </div>
+                        <span class="card-more-badge">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            匿名での提出もOK
+                        </span>
+                        <h4 class="card-more-title">自分の作品を提出する</h4>
+                        <p class="card-more-desc">自作のキューブWebアプリや特訓ツールを掲載しませんか？ 匿名・ペンネームでのご応募も大歓迎です（掲載無料）。</p>
+                        <span class="card-more-btn">
+                            <span>作品を応募する</span>
+                            <span>↗</span>
+                        </span>
+                    </article>
                 </div>
 
                 <!-- Group 2 (シームレスループ用) -->
                 <div class="community-marquee-group" aria-hidden="true">
                     <!-- App 1: YUBI GUI 指遣いワークスペース -->
-                    <article class="community-app-card">
+                    <article class="community-app-card" onclick="handleCardPlayClick('app-yubi', event)" data-app-id="app-yubi" tabindex="-1">
                         <div class="community-app-card__header">
                             <h3 class="community-app-card__title">YUBI GUI — 指遣いワークスペース</h3>
                             <p class="community-app-card__desc">
@@ -3168,18 +3210,12 @@
                                 <text x="140" y="244" fill="rgba(255,255,255,0.7)" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">FINGER TRICK WORKSPACE</text>
                             </svg>
                         </div>
-                        <div class="community-app-card__action">
-                            <button type="button" class="community-app-card__play-btn" onclick="openAppModal('app-yubi')" tabindex="-1">
-                                <span>遊ぶ</span>
-                                <span class="play-icon">▷</span>
-                            </button>
-                        </div>
-                        <div class="community-app-card__dev-wrap" tabindex="-1">
+                        <div class="community-app-card__dev-wrap" onclick="event.stopPropagation()" tabindex="-1">
                             <div class="community-app-card__dev-trigger">
                                 <div class="community-app-card__dev-main">
                                     <span class="community-app-card__dev-avatar">YG</span>
                                     <div class="community-app-card__dev-title-box">
-                                        <span class="community-app-card__dev-role-label">DEVELOPER</span>
+                                        <span class="community-app-card__dev-role-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>開発者</span>
                                         <strong class="community-app-card__dev-name">YUBI Project</strong>
                                     </div>
                                 </div>
@@ -3211,7 +3247,7 @@
                     </article>
 
                     <!-- App 2: F2L スロット直感シミュレータ -->
-                    <article class="community-app-card f2l">
+                    <article class="community-app-card f2l" onclick="handleCardPlayClick('app-f2l', event)" data-app-id="app-f2l" tabindex="-1">
                         <div class="community-app-card__header">
                             <h3 class="community-app-card__title">F2L スロット直感シミュレータ</h3>
                             <p class="community-app-card__desc">
@@ -3235,18 +3271,12 @@
                                 <text x="140" y="246" fill="rgba(255,255,255,0.6)" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">SLOT INTUITION SIMULATOR</text>
                             </svg>
                         </div>
-                        <div class="community-app-card__action">
-                            <button type="button" class="community-app-card__play-btn" onclick="openAppModal('app-f2l')" tabindex="-1">
-                                <span>遊ぶ</span>
-                                <span class="play-icon">▷</span>
-                            </button>
-                        </div>
-                        <div class="community-app-card__dev-wrap" tabindex="-1">
+                        <div class="community-app-card__dev-wrap" onclick="event.stopPropagation()" tabindex="-1">
                             <div class="community-app-card__dev-trigger">
                                 <div class="community-app-card__dev-main">
                                     <span class="community-app-card__dev-avatar">SR</span>
                                     <div class="community-app-card__dev-title-box">
-                                        <span class="community-app-card__dev-role-label">DEVELOPER</span>
+                                        <span class="community-app-card__dev-role-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>開発者</span>
                                         <strong class="community-app-card__dev-name">Sora</strong>
                                     </div>
                                 </div>
@@ -3278,7 +3308,7 @@
                     </article>
 
                     <!-- App 1 リピート -->
-                    <article class="community-app-card">
+                    <article class="community-app-card" onclick="handleCardPlayClick('app-yubi', event)" data-app-id="app-yubi" tabindex="-1">
                         <div class="community-app-card__header">
                             <h3 class="community-app-card__title">YUBI GUI — 指遣いワークスペース</h3>
                             <p class="community-app-card__desc">
@@ -3302,18 +3332,12 @@
                                 <text x="140" y="244" fill="rgba(255,255,255,0.7)" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">FINGER TRICK WORKSPACE</text>
                             </svg>
                         </div>
-                        <div class="community-app-card__action">
-                            <button type="button" class="community-app-card__play-btn" onclick="openAppModal('app-yubi')" tabindex="-1">
-                                <span>遊ぶ</span>
-                                <span class="play-icon">▷</span>
-                            </button>
-                        </div>
-                        <div class="community-app-card__dev-wrap" tabindex="-1">
+                        <div class="community-app-card__dev-wrap" onclick="event.stopPropagation()" tabindex="-1">
                             <div class="community-app-card__dev-trigger">
                                 <div class="community-app-card__dev-main">
                                     <span class="community-app-card__dev-avatar">YG</span>
                                     <div class="community-app-card__dev-title-box">
-                                        <span class="community-app-card__dev-role-label">DEVELOPER</span>
+                                        <span class="community-app-card__dev-role-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>開発者</span>
                                         <strong class="community-app-card__dev-name">YUBI Project</strong>
                                     </div>
                                 </div>
@@ -3345,7 +3369,7 @@
                     </article>
 
                     <!-- App 2 リピート -->
-                    <article class="community-app-card f2l">
+                    <article class="community-app-card f2l" onclick="handleCardPlayClick('app-f2l', event)" data-app-id="app-f2l" tabindex="-1">
                         <div class="community-app-card__header">
                             <h3 class="community-app-card__title">F2L スロット直感シミュレータ</h3>
                             <p class="community-app-card__desc">
@@ -3369,18 +3393,12 @@
                                 <text x="140" y="246" fill="rgba(255,255,255,0.6)" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">SLOT INTUITION SIMULATOR</text>
                             </svg>
                         </div>
-                        <div class="community-app-card__action">
-                            <button type="button" class="community-app-card__play-btn" onclick="openAppModal('app-f2l')" tabindex="-1">
-                                <span>遊ぶ</span>
-                                <span class="play-icon">▷</span>
-                            </button>
-                        </div>
-                        <div class="community-app-card__dev-wrap" tabindex="-1">
+                        <div class="community-app-card__dev-wrap" onclick="event.stopPropagation()" tabindex="-1">
                             <div class="community-app-card__dev-trigger">
                                 <div class="community-app-card__dev-main">
                                     <span class="community-app-card__dev-avatar">SR</span>
                                     <div class="community-app-card__dev-title-box">
-                                        <span class="community-app-card__dev-role-label">DEVELOPER</span>
+                                        <span class="community-app-card__dev-role-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>開発者</span>
                                         <strong class="community-app-card__dev-name">Sora</strong>
                                     </div>
                                 </div>
@@ -3411,83 +3429,294 @@
                         </div>
                     </article>
 
-                    <!-- カルーセル末尾: 作品一覧への誘導カード -->
-                    <article class="community-app-card--more" onclick="openCatalogModal()" role="button" tabindex="0" aria-label="すべてのコミュニティ作品一覧を見る">
-                        <div class="card-more-icon-wrap">
-                            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="3" width="7" height="7"></rect>
-                                <rect x="14" y="3" width="7" height="7"></rect>
-                                <rect x="14" y="14" width="7" height="7"></rect>
-                                <rect x="3" y="14" width="7" height="7"></rect>
+                    <!-- カルーセル末尾: 自分の作品を提出する（問い合わせページへの誘導カード） -->
+                    <article class="community-app-card--more" onclick="handleCardSubmitClick(event)" role="button" tabindex="-1" aria-label="自分の作品を提出する（問い合わせページを開く）">
+                        <div class="card-more-icon-wrap" aria-hidden="true">
+                            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
                             </svg>
                         </div>
-                        <h4 class="card-more-title">すべての作品を見る</h4>
-                        <p class="card-more-desc">キューバー有志による特訓ツールやWebアプリを一覧カタログから探せます。</p>
+                        <span class="card-more-badge">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            匿名での提出もOK
+                        </span>
+                        <h4 class="card-more-title">自分の作品を提出する</h4>
+                        <p class="card-more-desc">自作のキューブWebアプリや特訓ツールを掲載しませんか？ 匿名・ペンネームでのご応募も大歓迎です（掲載無料）。</p>
                         <span class="card-more-btn">
-                            <span>一覧を開く</span>
+                            <span>作品を応募する</span>
+                            <span>↗</span>
+                        </span>
+                    </article>
+                </div>
+
+                <!-- Group 3 (シームレスループ用) -->
+                <div class="community-marquee-group" aria-hidden="true">
+                    <!-- App 1: YUBI GUI 指遣いワークスペース -->
+                    <article class="community-app-card" onclick="handleCardPlayClick('app-yubi', event)" data-app-id="app-yubi" tabindex="-1">
+                        <div class="community-app-card__header">
+                            <h3 class="community-app-card__title">YUBI GUI — 指遣いワークスペース</h3>
+                            <p class="community-app-card__desc">
+                                手順から最適な指遣いを解析。WASM探索エンジンと3Dハンドアニメーションで、スムーズなフィンガートリックを直感的に学べるWebツールです。
+                            </p>
+                        </div>
+                        <div class="community-app-card__thumb-wrap">
+                            <svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="280" height="280" fill="url(#thumbBg1)"/>
+                                <path d="M0 70h280M0 140h280M0 210h280M70 0v280M140 0v280M210 0v280" stroke="rgba(0, 210, 255, 0.08)" stroke-width="1.2"/>
+                                <circle cx="140" cy="115" r="85" fill="none" stroke="rgba(0, 210, 255, 0.12)" stroke-dasharray="4 4"/>
+                                <g transform="translate(140, 110)">
+                                    <polygon points="0,-52 56,-24 0,4 -56,-24" fill="url(#cubeGradY)" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+                                    <polygon points="0,4 56,-24 56,36 0,64" fill="url(#cubeGradB)" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+                                    <polygon points="-56,-24 0,4 0,64 -56,36" fill="#0f172a" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+                                    <path d="M-40,10 Q0,-30 40,20" fill="none" stroke="#38bdf8" stroke-width="3" stroke-dasharray="5 3"/>
+                                    <polygon points="40,20 32,12 38,8" fill="#38bdf8"/>
+                                </g>
+                                <rect x="35" y="206" width="210" height="46" rx="12" fill="#030712" stroke="#00d2ff" stroke-width="1.5"/>
+                                <text x="140" y="231" fill="#00d2ff" font-size="16" font-weight="900" font-family="monospace" text-anchor="middle" letter-spacing="2">YUBI GUI 3D</text>
+                                <text x="140" y="244" fill="rgba(255,255,255,0.7)" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">FINGER TRICK WORKSPACE</text>
+                            </svg>
+                        </div>
+                        <div class="community-app-card__dev-wrap" onclick="event.stopPropagation()" tabindex="-1">
+                            <div class="community-app-card__dev-trigger">
+                                <div class="community-app-card__dev-main">
+                                    <span class="community-app-card__dev-avatar">YG</span>
+                                    <div class="community-app-card__dev-title-box">
+                                        <span class="community-app-card__dev-role-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>開発者</span>
+                                        <strong class="community-app-card__dev-name">YUBI Project</strong>
+                                    </div>
+                                </div>
+                                <span class="community-app-card__dev-hint">
+                                    <span>プロフィール</span>
+                                    <span class="hint-arrow">›</span>
+                                </span>
+                            </div>
+                            <div class="community-app-card__dev-popover">
+                                <div class="dev-popover__status-row">
+                                    <div class="dev-popover__stat-badge">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        <span>審査通過アプリ: <strong>1作品</strong></span>
+                                    </div>
+                                    <span class="dev-popover__cube-exp">キューブ歴 5年</span>
+                                </div>
+                                <div class="dev-popover__header">
+                                    <div class="dev-popover__avatar-mini">YG</div>
+                                    <div class="dev-popover__profile-text">
+                                        <strong class="dev-popover__name">YUBI Project</strong>
+                                        <span class="dev-popover__specialty">Webツール開発 / WASM・3D</span>
+                                    </div>
+                                </div>
+                                <p class="dev-popover__bio">
+                                    キューブ歴5年。効率的なフィンガートリックの探求とWebツールの開発に取り組んでいます。
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- App 2: F2L スロット直感シミュレータ -->
+                    <article class="community-app-card f2l" onclick="handleCardPlayClick('app-f2l', event)" data-app-id="app-f2l" tabindex="-1">
+                        <div class="community-app-card__header">
+                            <h3 class="community-app-card__title">F2L スロット直感シミュレータ</h3>
+                            <p class="community-app-card__desc">
+                                死角になりやすい背面・裏スロットのペアイン軌道を3Dモデルで直感的に可視化。持ち替えを減らし、先読み（ルックアヘッド）スピードを鍛える特訓ツールです。
+                            </p>
+                        </div>
+                        <div class="community-app-card__thumb-wrap">
+                            <svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="280" height="280" fill="url(#thumbBg2)"/>
+                                <path d="M0 70h280M0 140h280M0 210h280M70 0v280M140 0v280M210 0v280" stroke="rgba(168, 85, 247, 0.08)" stroke-width="1.2"/>
+                                <circle cx="140" cy="120" r="85" fill="none" stroke="rgba(168, 85, 247, 0.15)" stroke-dasharray="4 4"/>
+                                <g transform="translate(140, 115)">
+                                    <polygon points="0,-56 56,-26 0,4 -56,-26" fill="none" stroke="#ec4899" stroke-width="2.5"/>
+                                    <polygon points="0,4 56,-26 56,38 0,68" fill="url(#slotGrad)" fill-opacity="0.8" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+                                    <polygon points="-56,-26 0,4 0,68 -56,38" fill="#3b0764" fill-opacity="0.85" stroke="#a855f7" stroke-width="2" stroke-linejoin="round"/>
+                                    <path d="M-35,-45 Q0,-72 42,-40" fill="none" stroke="#ff0077" stroke-width="3.5" stroke-linecap="round"/>
+                                    <polygon points="42,-40 30,-50 39,-56" fill="#ff0077"/>
+                                </g>
+                                <rect x="50" y="208" width="180" height="42" rx="10" fill="#030712" stroke="#a855f7" stroke-width="1.5"/>
+                                <text x="140" y="234" fill="#c084fc" font-size="18" font-weight="900" font-family="monospace" text-anchor="middle" letter-spacing="2">F2L 3D WEB</text>
+                                <text x="140" y="246" fill="rgba(255,255,255,0.6)" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">SLOT INTUITION SIMULATOR</text>
+                            </svg>
+                        </div>
+                        <div class="community-app-card__dev-wrap" onclick="event.stopPropagation()" tabindex="-1">
+                            <div class="community-app-card__dev-trigger">
+                                <div class="community-app-card__dev-main">
+                                    <span class="community-app-card__dev-avatar">SR</span>
+                                    <div class="community-app-card__dev-title-box">
+                                        <span class="community-app-card__dev-role-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>開発者</span>
+                                        <strong class="community-app-card__dev-name">Sora</strong>
+                                    </div>
+                                </div>
+                                <span class="community-app-card__dev-hint">
+                                    <span>プロフィール</span>
+                                    <span class="hint-arrow">›</span>
+                                </span>
+                            </div>
+                            <div class="community-app-card__dev-popover">
+                                <div class="dev-popover__status-row">
+                                    <div class="dev-popover__stat-badge">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        <span>審査通過アプリ: <strong>1作品</strong></span>
+                                    </div>
+                                    <span class="dev-popover__cube-exp">キューブ歴 3年</span>
+                                </div>
+                                <div class="dev-popover__header">
+                                    <div class="dev-popover__avatar-mini">SR</div>
+                                    <div class="dev-popover__profile-text">
+                                        <strong class="dev-popover__name">Sora</strong>
+                                        <span class="dev-popover__specialty">Web3Dエンジニア / Three.js</span>
+                                    </div>
+                                </div>
+                                <p class="dev-popover__bio">
+                                    キューブ歴3年。競技パズルとWebGL開発が好きで、立体的な解法ツールの開発に取り組んでいます。
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- App 1 リピート -->
+                    <article class="community-app-card" onclick="handleCardPlayClick('app-yubi', event)" data-app-id="app-yubi" tabindex="-1">
+                        <div class="community-app-card__header">
+                            <h3 class="community-app-card__title">YUBI GUI — 指遣いワークスペース</h3>
+                            <p class="community-app-card__desc">
+                                手順から最適な指遣いを解析。WASM探索エンジンと3Dハンドアニメーションで、スムーズなフィンガートリックを直感的に学べるWebツールです。
+                            </p>
+                        </div>
+                        <div class="community-app-card__thumb-wrap">
+                            <svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="280" height="280" fill="url(#thumbBg1)"/>
+                                <path d="M0 70h280M0 140h280M0 210h280M70 0v280M140 0v280M210 0v280" stroke="rgba(0, 210, 255, 0.08)" stroke-width="1.2"/>
+                                <circle cx="140" cy="115" r="85" fill="none" stroke="rgba(0, 210, 255, 0.12)" stroke-dasharray="4 4"/>
+                                <g transform="translate(140, 110)">
+                                    <polygon points="0,-52 56,-24 0,4 -56,-24" fill="url(#cubeGradY)" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+                                    <polygon points="0,4 56,-24 56,36 0,64" fill="url(#cubeGradB)" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+                                    <polygon points="-56,-24 0,4 0,64 -56,36" fill="#0f172a" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+                                    <path d="M-40,10 Q0,-30 40,20" fill="none" stroke="#38bdf8" stroke-width="3" stroke-dasharray="5 3"/>
+                                    <polygon points="40,20 32,12 38,8" fill="#38bdf8"/>
+                                </g>
+                                <rect x="35" y="206" width="210" height="46" rx="12" fill="#030712" stroke="#00d2ff" stroke-width="1.5"/>
+                                <text x="140" y="231" fill="#00d2ff" font-size="16" font-weight="900" font-family="monospace" text-anchor="middle" letter-spacing="2">YUBI GUI 3D</text>
+                                <text x="140" y="244" fill="rgba(255,255,255,0.7)" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">FINGER TRICK WORKSPACE</text>
+                            </svg>
+                        </div>
+                        <div class="community-app-card__dev-wrap" onclick="event.stopPropagation()" tabindex="-1">
+                            <div class="community-app-card__dev-trigger">
+                                <div class="community-app-card__dev-main">
+                                    <span class="community-app-card__dev-avatar">YG</span>
+                                    <div class="community-app-card__dev-title-box">
+                                        <span class="community-app-card__dev-role-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>開発者</span>
+                                        <strong class="community-app-card__dev-name">YUBI Project</strong>
+                                    </div>
+                                </div>
+                                <span class="community-app-card__dev-hint">
+                                    <span>プロフィール</span>
+                                    <span class="hint-arrow">›</span>
+                                </span>
+                            </div>
+                            <div class="community-app-card__dev-popover">
+                                <div class="dev-popover__status-row">
+                                    <div class="dev-popover__stat-badge">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        <span>審査通過アプリ: <strong>1作品</strong></span>
+                                    </div>
+                                    <span class="dev-popover__cube-exp">キューブ歴 5年</span>
+                                </div>
+                                <div class="dev-popover__header">
+                                    <div class="dev-popover__avatar-mini">YG</div>
+                                    <div class="dev-popover__profile-text">
+                                        <strong class="dev-popover__name">YUBI Project</strong>
+                                        <span class="dev-popover__specialty">Webツール開発 / WASM・3D</span>
+                                    </div>
+                                </div>
+                                <p class="dev-popover__bio">
+                                    キューブ歴5年。効率的なフィンガートリックの探求とWebツールの開発に取り組んでいます。
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- App 2 リピート -->
+                    <article class="community-app-card f2l" onclick="handleCardPlayClick('app-f2l', event)" data-app-id="app-f2l" tabindex="-1">
+                        <div class="community-app-card__header">
+                            <h3 class="community-app-card__title">F2L スロット直感シミュレータ</h3>
+                            <p class="community-app-card__desc">
+                                死角になりやすい背面・裏スロットのペアイン軌道を3Dモデルで直感的に可視化。持ち替えを減らし、先読み（ルックアヘッド）スピードを鍛える特訓ツールです。
+                            </p>
+                        </div>
+                        <div class="community-app-card__thumb-wrap">
+                            <svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="280" height="280" fill="url(#thumbBg2)"/>
+                                <path d="M0 70h280M0 140h280M0 210h280M70 0v280M140 0v280M210 0v280" stroke="rgba(168, 85, 247, 0.08)" stroke-width="1.2"/>
+                                <circle cx="140" cy="120" r="85" fill="none" stroke="rgba(168, 85, 247, 0.15)" stroke-dasharray="4 4"/>
+                                <g transform="translate(140, 115)">
+                                    <polygon points="0,-56 56,-26 0,4 -56,-26" fill="none" stroke="#ec4899" stroke-width="2.5"/>
+                                    <polygon points="0,4 56,-26 56,38 0,68" fill="url(#slotGrad)" fill-opacity="0.8" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+                                    <polygon points="-56,-26 0,4 0,68 -56,38" fill="#3b0764" fill-opacity="0.85" stroke="#a855f7" stroke-width="2" stroke-linejoin="round"/>
+                                    <path d="M-35,-45 Q0,-72 42,-40" fill="none" stroke="#ff0077" stroke-width="3.5" stroke-linecap="round"/>
+                                    <polygon points="42,-40 30,-50 39,-56" fill="#ff0077"/>
+                                </g>
+                                <rect x="50" y="208" width="180" height="42" rx="10" fill="#030712" stroke="#a855f7" stroke-width="1.5"/>
+                                <text x="140" y="234" fill="#c084fc" font-size="18" font-weight="900" font-family="monospace" text-anchor="middle" letter-spacing="2">F2L 3D WEB</text>
+                                <text x="140" y="246" fill="rgba(255,255,255,0.6)" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">SLOT INTUITION SIMULATOR</text>
+                            </svg>
+                        </div>
+                        <div class="community-app-card__dev-wrap" onclick="event.stopPropagation()" tabindex="-1">
+                            <div class="community-app-card__dev-trigger">
+                                <div class="community-app-card__dev-main">
+                                    <span class="community-app-card__dev-avatar">SR</span>
+                                    <div class="community-app-card__dev-title-box">
+                                        <span class="community-app-card__dev-role-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>開発者</span>
+                                        <strong class="community-app-card__dev-name">Sora</strong>
+                                    </div>
+                                </div>
+                                <span class="community-app-card__dev-hint">
+                                    <span>プロフィール</span>
+                                    <span class="hint-arrow">›</span>
+                                </span>
+                            </div>
+                            <div class="community-app-card__dev-popover">
+                                <div class="dev-popover__status-row">
+                                    <div class="dev-popover__stat-badge">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        <span>審査通過アプリ: <strong>1作品</strong></span>
+                                    </div>
+                                    <span class="dev-popover__cube-exp">キューブ歴 3年</span>
+                                </div>
+                                <div class="dev-popover__header">
+                                    <div class="dev-popover__avatar-mini">SR</div>
+                                    <div class="dev-popover__profile-text">
+                                        <strong class="dev-popover__name">Sora</strong>
+                                        <span class="dev-popover__specialty">Web3Dエンジニア / Three.js</span>
+                                    </div>
+                                </div>
+                                <p class="dev-popover__bio">
+                                    キューブ歴3年。競技パズルとWebGL開発が好きで、立体的な解法ツールの開発に取り組んでいます。
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- カルーセル末尾: 自分の作品を提出する（問い合わせページへの誘導カード） -->
+                    <article class="community-app-card--more" onclick="handleCardSubmitClick(event)" role="button" tabindex="-1" aria-label="自分の作品を提出する（問い合わせページを開く）">
+                        <div class="card-more-icon-wrap" aria-hidden="true">
+                            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </div>
+                        <span class="card-more-badge">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            匿名での提出もOK
+                        </span>
+                        <h4 class="card-more-title">自分の作品を提出する</h4>
+                        <p class="card-more-desc">自作のキューブWebアプリや特訓ツールを掲載しませんか？ 匿名・ペンネームでのご応募も大歓迎です（掲載無料）。</p>
+                        <span class="card-more-btn">
+                            <span>作品を応募する</span>
                             <span>↗</span>
                         </span>
                     </article>
                 </div>
             </div>
-        </div>
-
-        <!-- クリエイター応募・掲載募集バナー -->
-        <div class="community-light-zone__inner">
-            <div class="arcade-recruit-banner arcade-recruit-banner--light">
-            <div class="recruit-glow-circle"></div>
-            <div class="recruit-inner">
-                <div class="recruit-feature-pills">
-                    <span class="recruit-pill recruit-pill--easy">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                        URLを伝えるだけ！
-                    </span>
-                    <span class="recruit-pill recruit-pill--free">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        完全無料！
-                    </span>
-                </div>
-                <h2 class="recruit-h2">あなたの作ったパズルWebアプリを掲載しませんか？</h2>
-                <p class="recruit-body-p">
-                    個人開発のWebツールやパズルゲームを大募集。面倒な手続きは一切不要、公開URLをお知らせいただくだけで気軽にご応募いただけます。
-                </p>
-
-                <div class="recruit-cards-highlight">
-                    <div class="recruit-card-item">
-                        <div class="recruit-card-icon">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                            </svg>
-                        </div>
-                        <div class="recruit-card-texts">
-                            <strong>審査に通過したアプリは公式XやYouTubeで紹介</strong>
-                            <span>審査に通過したアプリは、公式XやYouTubeなどで紹介します。多くのパズルファンへ作品をお届けします。</span>
-                        </div>
-                    </div>
-
-                    <div class="recruit-card-item">
-                        <div class="recruit-card-icon">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                        </div>
-                        <div class="recruit-card-texts">
-                            <strong>作者情報完全表記、匿名でもOK</strong>
-                            <span>アプリ開発者情報を掲載します。匿名やペンネームでの応募もOKです。</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="recruit-action-row">
-                    <a href="https://gachi-cube.com/contact.php" target="_blank" rel="noopener noreferrer" class="btn-recruit-cta">
-                        無料でアプリ掲載を申し込む ↗
-                    </a>
-                    <span class="recruit-fee-note">※ 掲載料・手数料などは一切かかりません（完全無料）</span>
-                </div>
-            </div>
-        </div>
         </div>
     </section>
     <!-- コミュニティ作品カタログ一覧モーダル -->
@@ -3643,38 +3872,67 @@
         };
 
         // =========================================
-        // 1. スライダー左右操作・ドラッグ・自動ゆっくりスクロール
+        // 1. スライダー左右操作・ドラッグ・シームレス無限自動スクロール
         // =========================================
         const marqueeWrapper = document.getElementById('communityMarqueeWrapper');
+        const marqueeTrack = document.getElementById('communityMarqueeTrack');
         const sliderPrevBtn = document.getElementById('communitySliderPrev');
         const sliderNextBtn = document.getElementById('communitySliderNext');
+        let hasDragged = false; // ドラッグ操作時の誤クリック防止フラグ（グローバル管理）
 
-        if (marqueeWrapper) {
-            // 左右ナビゲーションボタンクリックでスムーズスクロール
+        if (marqueeWrapper && marqueeTrack) {
+            // 1周期（1グループ分）のスクロール距離を正確に算出（CSS gap等も実測から正確に反映）
+            function getLoopDistance() {
+                const groups = marqueeTrack.querySelectorAll('.community-marquee-group');
+                if (groups.length >= 2) {
+                    return groups[1].offsetLeft - groups[0].offsetLeft;
+                }
+                return 0;
+            }
+
+            let loopDistance = getLoopDistance();
+
+            // ウィンドウリサイズ時に再計算
+            window.addEventListener('resize', () => {
+                loopDistance = getLoopDistance();
+            });
+
+            // 境界に達した瞬間に同じ表示位置へシームレスに巻き戻す
+            function checkSeamlessLoop() {
+                if (loopDistance <= 0) return;
+                if (marqueeWrapper.scrollLeft >= loopDistance) {
+                    marqueeWrapper.scrollLeft -= loopDistance;
+                } else if (marqueeWrapper.scrollLeft <= 0) {
+                    marqueeWrapper.scrollLeft += loopDistance;
+                }
+            }
+
+            // 左右ナビゲーションボタン（手動操作時は滑らかにスクロール）
             if (sliderPrevBtn) {
                 sliderPrevBtn.addEventListener('click', () => {
-                    marqueeWrapper.scrollBy({ left: -380, behavior: 'smooth' });
                     pauseAutoScrollTemporarily();
+                    marqueeWrapper.scrollBy({ left: -380, behavior: 'smooth' });
                 });
             }
             if (sliderNextBtn) {
                 sliderNextBtn.addEventListener('click', () => {
-                    marqueeWrapper.scrollBy({ left: 380, behavior: 'smooth' });
                     pauseAutoScrollTemporarily();
+                    marqueeWrapper.scrollBy({ left: 380, behavior: 'smooth' });
                 });
             }
 
-            // マウスクリック＆ドラッグによるスムーズ横スクロール (Grab to scroll)
+            // マウスクリック＆ドラッグ操作 (Grab to scroll)
             let isDragging = false;
             let startX = 0;
             let scrollStartLeft = 0;
 
             marqueeWrapper.addEventListener('mousedown', (e) => {
-                // ボタン・リンク・インタラクティブ要素のクリック時はドラッグ発火しない
-                if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.community-app-card__dev-wrap')) {
+                // リンク・開発者プロフィールのクリック時はドラッグスクロールを発火させない
+                if (e.target.closest('a') || e.target.closest('.community-app-card__dev-wrap')) {
                     return;
                 }
                 isDragging = true;
+                hasDragged = false;
                 marqueeWrapper.classList.add('is-dragging');
                 startX = e.pageX - marqueeWrapper.offsetLeft;
                 scrollStartLeft = marqueeWrapper.scrollLeft;
@@ -3691,29 +3949,47 @@
 
             marqueeWrapper.addEventListener('mousemove', (e) => {
                 if (!isDragging) return;
-                e.preventDefault();
                 const x = e.pageX - marqueeWrapper.offsetLeft;
                 const walk = (x - startX) * 1.5;
+                if (Math.abs(walk) > 6) {
+                    hasDragged = true;
+                }
+                e.preventDefault();
                 marqueeWrapper.scrollLeft = scrollStartLeft - walk;
+                checkSeamlessLoop();
             });
 
-            // ゆとりソフトのような自動ゆっくり進行
-            let autoScrollTimer = null;
+            // 手動スクロール（ホイール・トラックパッド等）でもシームレス境界を維持
+            marqueeWrapper.addEventListener('scroll', () => {
+                if (isDragging || isUserInteracting) {
+                    checkSeamlessLoop();
+                }
+            });
+
+            // requestAnimationFrame による超滑らかな自動スクロール
+            let autoScrollRaf = null;
+            let lastTimestamp = performance.now();
             let isUserInteracting = false;
             let resumeTimeout = null;
+            const SCROLL_SPEED_PX_PER_SEC = 36; // 毎秒36pxの心地よいスクロール速度
+
+            function autoScrollStep(now) {
+                const delta = (now - lastTimestamp) / 1000;
+                lastTimestamp = now;
+
+                if (!isUserInteracting && !isDragging && loopDistance > 0) {
+                    marqueeWrapper.scrollLeft += SCROLL_SPEED_PX_PER_SEC * delta;
+                    checkSeamlessLoop();
+                }
+
+                autoScrollRaf = requestAnimationFrame(autoScrollStep);
+            }
 
             function startAutoScroll() {
-                if (autoScrollTimer) return;
-                autoScrollTimer = setInterval(() => {
-                    if (isUserInteracting || isDragging) return;
-                    // 末尾に達したら先頭へシームレスに戻る
-                    const maxScroll = marqueeWrapper.scrollWidth - marqueeWrapper.clientWidth;
-                    if (marqueeWrapper.scrollLeft >= maxScroll - 5) {
-                        marqueeWrapper.scrollTo({ left: 0, behavior: 'smooth' });
-                    } else {
-                        marqueeWrapper.scrollLeft += 0.8;
-                    }
-                }, 30);
+                if (!autoScrollRaf) {
+                    lastTimestamp = performance.now();
+                    autoScrollRaf = requestAnimationFrame(autoScrollStep);
+                }
             }
 
             function pauseAutoScroll() {
@@ -3730,7 +4006,8 @@
                 if (resumeTimeout) clearTimeout(resumeTimeout);
                 resumeTimeout = setTimeout(() => {
                     isUserInteracting = false;
-                }, 2500);
+                    lastTimestamp = performance.now();
+                }, 2200);
             }
 
             marqueeWrapper.addEventListener('mouseenter', pauseAutoScroll);
@@ -3740,7 +4017,11 @@
             marqueeWrapper.addEventListener('touchstart', pauseAutoScroll, { passive: true });
             marqueeWrapper.addEventListener('touchend', resumeAutoScrollAfterDelay, { passive: true });
 
-            startAutoScroll();
+            // DOM計測完了後に周期幅を取得して自動スクロール開始
+            setTimeout(() => {
+                loopDistance = getLoopDistance();
+                startAutoScroll();
+            }, 100);
         }
 
         // =========================================
@@ -3843,6 +4124,41 @@
                 openAppModal(appId);
             }, 120);
         }
+
+        // カードクリック時の即時起動ハンドラー（ドラッグ操作時は除外）
+        function handleCardPlayClick(appId, event) {
+            if (hasDragged) {
+                hasDragged = false;
+                return;
+            }
+            openAppModal(appId);
+        }
+
+        // 自分の作品を提出するカード クリックハンドラー（ドラッグ操作時は誤爆を防止）
+        function handleCardSubmitClick(event) {
+            if (hasDragged) {
+                hasDragged = false;
+                if (event) event.preventDefault();
+                return;
+            }
+            // 問い合わせページ（作品応募フォーム）を新規タブで開く
+            window.open('https://gachi-cube.com/contact.php', '_blank', 'noopener,noreferrer');
+        }
+
+        // キーボード操作対応 (Enter / Space キーでカード起動および作品提出)
+        document.addEventListener('keydown', function(e) {
+            if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.classList) {
+                if (e.target.classList.contains('community-app-card')) {
+                    if (e.target.closest && e.target.closest('.community-app-card__dev-wrap')) return;
+                    e.preventDefault();
+                    const appId = e.target.getAttribute('data-app-id');
+                    if (appId) openAppModal(appId);
+                } else if (e.target.classList.contains('community-app-card--more')) {
+                    e.preventDefault();
+                    handleCardSubmitClick(e);
+                }
+            }
+        });
 
         // =========================================
         // 3. 安全サンドボックスプレイヤー モーダル
